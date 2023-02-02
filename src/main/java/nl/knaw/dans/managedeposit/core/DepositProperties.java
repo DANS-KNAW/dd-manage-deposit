@@ -38,9 +38,6 @@ public class DepositProperties {
     @Column(name = "user_name")
     private String userName;
 
-    @Column(name="on_disk")
-    private boolean onDisk;
-
     @Column(name="deleted")
     private boolean deleted;
     @Column(name="created_date", nullable = false)
@@ -63,14 +60,6 @@ public class DepositProperties {
         this.userName = userName;
     }
 
-    public boolean isOnDisk() {
-        return onDisk;
-    }
-
-    public void setOnDisk(boolean onDisk) {
-        this.onDisk = onDisk;
-    }
-
     public boolean isDeleted() {
         return deleted;
     }
@@ -89,9 +78,10 @@ public class DepositProperties {
 
     public DepositProperties() {}
 
-    public DepositProperties(String depositId) {
+    public DepositProperties(String depositId, String userName, boolean isDeleted) {
         this.depositId = depositId;
-
+        this.userName = userName;
+        this.deleted = isDeleted;
         // get the current UTC timestamp or creation.timestamp from
         this.createdDate = OffsetDateTime.now();
     }
@@ -122,7 +112,6 @@ public class DepositProperties {
         return "DepositProperties{" +
             "depositId='" + depositId + '\'' +
             ", userName='" + userName + '\'' +
-            ", onDisk=" + onDisk +
             ", deleted=" + deleted +
             ", createdDate=" + createdDate +
             '}';
