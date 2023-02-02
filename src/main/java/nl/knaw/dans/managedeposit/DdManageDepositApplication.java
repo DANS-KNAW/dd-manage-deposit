@@ -17,14 +17,27 @@
 package nl.knaw.dans.managedeposit;
 
 import io.dropwizard.Application;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesReport;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
     public static void main(final String[] args) throws Exception {
         new DdManageDepositApplication().run(args);
     }
+
+    private final HibernateBundle<DdManageDepositConfiguration> hibernateBundle =
+        new HibernateBundle<DdManageDepositConfiguration>(DepositProperties.class) {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
+                return  configuration.getDepositPropertiesDatabase();
+            }
+        };
 
     @Override
     public String getName() {
@@ -33,12 +46,14 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
     @Override
     public void initialize(final Bootstrap<DdManageDepositConfiguration> bootstrap) {
-        // TODO: application initialization
+        bootstrap.addBundle(hibernateBundle);
     }
 
     @Override
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
+        DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(hibernateBundle.getSessionFactory());
 
+        environment.jersey().register(new DepositPropertiesReport(depositPropertiesDAO));
     }
 
 }

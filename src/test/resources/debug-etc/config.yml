@@ -1,28 +1,40 @@
-
-server:
-  applicationContextPath: /
-  adminContextPath: /
-  applicationConnectors:
-    - type: http
-      # Replace with port number unique for this service
-      port: 20000
-  adminConnectors:
-    - type: http
-      # Replace with port number unique for this service
-      port: 20001
-
 #
-# See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
+# dd-manage-deposit configuration file
 #
-logging:
-  level: INFO
-  loggers:
-    "nl.knaw.dans":
-      level: TRACE
-  appenders:
-    - type: console
-      logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
+  server:
+    applicationContextPath: /
+    adminContextPath: /
+    applicationConnectors:
+      - type: http
+        port: 20347
+    adminConnectors:
+      - type: http
+        port: 20348
 
-    - type: file
-      archive: false
-      currentLogFilename: data/dd-manage-deposit.log
+  # depositBoxes:
+  #   - data/auto-ingest/inbox
+  #   - data/auto-ingest/outbox/processed
+  #   - data/auto-ingest/outbox/rejected
+  #   - data/auto-ingest/outbox/failed
+  #   - data/sword2-uploads
+
+  depositPropertiesDatabase:
+    driverClass: org.hsqldb.jdbcDriver
+    url: jdbc:hsqldb:hsql://localhost:9001/dd-manage-deposit
+    logValidationErrors: true
+    # See: https://stackoverflow.com/questions/10684244/dbcp-validationquery-for-different-databases
+    validationQuery: SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES
+    properties:
+      hibernate.dialect: 'org.hibernate.dialect.HSQLDialect'
+      hibernate.hbm2ddl.auto: update
+
+  #
+  # See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
+  #
+  logging:
+    level: DEBUG
+    appenders:
+      - type: file
+        archive: false
+        timeZone: system
+        currentLogFilename: data/dd-manage-deposit.log
