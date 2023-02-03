@@ -38,3 +38,5 @@
         archive: false
         timeZone: system
         currentLogFilename: data/dd-manage-deposit.log
+      - type: console
+        logFormat: "%-5p [%d{ISO8601}] [%t] %c: %m%n%rEx"
