@@ -22,8 +22,10 @@ import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -46,9 +48,16 @@ public class DepositPropertiesReport {
     }
 
     @GET
-    @Produces({"text/csv", MediaType.APPLICATION_JSON})
     @UnitOfWork
     public List<DepositProperties> listDepositProperties() {
         return depositPropertiesDAO.findAll();
+    }
+
+    @GET
+    @UnitOfWork
+    @Path("/{depositId}")
+    public String getDepositId(@PathParam("DepositId") String depositId) {
+        DepositProperties  depositProperties = depositPropertiesDAO.findById(depositId).orElseThrow(() -> new NotFoundException("No such user."));
+        return depositProperties.toString();
     }
 }

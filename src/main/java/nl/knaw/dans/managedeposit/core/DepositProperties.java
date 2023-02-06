@@ -19,6 +19,8 @@ import org.hibernate.SessionFactory;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -40,7 +42,7 @@ public class DepositProperties {
 
     @Column(name="deleted")
     private boolean deleted;
-    @Column(name="created_date", nullable = false)
+    @Column(name="created_date")
     private OffsetDateTime createdDate;
 
     @Column(name = "state")
