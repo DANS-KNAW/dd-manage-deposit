@@ -21,12 +21,17 @@ import io.dropwizard.db.DataSourceFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DdManageDepositConfiguration extends Configuration {
     @Valid
     @NotNull
     private DataSourceFactory database = new DataSourceFactory();
 
+    private List<String> depositBoxes = new ArrayList<>();
+    public List<String> getDepositBoxes() {return depositBoxes;}
+    public void setDepositBoxes(List<String> depositBoxes) {this.depositBoxes = depositBoxes;}
 
     public DataSourceFactory getDepositPropertiesDatabase() {
         return database;

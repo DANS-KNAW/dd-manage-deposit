@@ -37,6 +37,10 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return persist(dp);
     }
 
+    public void delete(DepositProperties dp) {
+        currentSession().delete(dp);
+    }
+
 
     public List<DepositProperties> findAllDefaultQuery() {
         return list(namedTypedQuery("nl.knaw.dans.managedeposit.core.DepositProperties.findAll"));

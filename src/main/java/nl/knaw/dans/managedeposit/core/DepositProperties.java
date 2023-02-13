@@ -15,12 +15,8 @@
  */
 package nl.knaw.dans.managedeposit.core;
 
-import org.hibernate.SessionFactory;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -32,6 +28,7 @@ import java.time.OffsetDateTime;
     name = "nl.knaw.dans.managedeposit.core.DepositProperties.findAll",
     query = "SELECT dp FROM DepositProperties dp"
 )
+//@JsonPropertyOrder({"depositId", "User Name", "deleted", "Created Date"})
 public class DepositProperties {
     @Id
     @Column(name = "deposit_id", nullable = false)
@@ -49,7 +46,15 @@ public class DepositProperties {
     public String getDepositId() {
         return depositId;
     }
+    public DepositProperties() {}
 
+    public DepositProperties(String depositId, String userName, boolean isDeleted) {
+        this.depositId = depositId;
+        this.userName = userName;
+        this.deleted = isDeleted;
+        // get the current UTC timestamp or creation.timestamp from
+        this.createdDate = OffsetDateTime.now();
+    }
     public void setDepositId(String depositId) {
         this.depositId = depositId;
     }
@@ -78,15 +83,7 @@ public class DepositProperties {
         this.createdDate = createdDate;
     }
 
-    public DepositProperties() {}
 
-    public DepositProperties(String depositId, String userName, boolean isDeleted) {
-        this.depositId = depositId;
-        this.userName = userName;
-        this.deleted = isDeleted;
-        // get the current UTC timestamp or creation.timestamp from
-        this.createdDate = OffsetDateTime.now();
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -109,13 +106,17 @@ public class DepositProperties {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "DepositProperties{" +
-            "depositId='" + depositId + '\'' +
-            ", userName='" + userName + '\'' +
-            ", deleted=" + deleted +
-            ", createdDate=" + createdDate +
-            '}';
-    }
+//    @Override
+//    public String toString() {
+//        if (createdDate == null){
+//            createdDate = OffsetDateTime.now();
+//        }
+//        return "DepositProperties{" +
+//            "depositId='" + depositId + '\'' +
+//            ", userName='" + userName + '\'' +
+//            ", deleted='" + deleted + '\'' +
+//            ", createdDate=" + createdDate.toLocalDate() +
+//            '}';
+//    }
+
 }

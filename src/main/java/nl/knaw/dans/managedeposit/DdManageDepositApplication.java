@@ -16,14 +16,18 @@
 
 package nl.knaw.dans.managedeposit;
 
+import com.codahale.metrics.health.HealthCheck;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import nl.knaw.dans.managedeposit.resources.DepositPropertiesReport;
+import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
@@ -53,7 +57,10 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
         DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(hibernateBundle.getSessionFactory());
 
-        environment.jersey().register(new DepositPropertiesReport(depositPropertiesDAO));
+        environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
+
+        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
+        environment.jersey().register(new CsvMessageBodyWriter());
     }
 
 }
