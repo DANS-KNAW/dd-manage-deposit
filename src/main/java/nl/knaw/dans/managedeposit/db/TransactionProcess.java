@@ -24,7 +24,6 @@ import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class TransactionProcess {
     private static final Logger log = LoggerFactory.getLogger(TransactionProcess.class);

@@ -16,8 +16,6 @@
 
 package nl.knaw.dans.managedeposit;
 
-import com.codahale.metrics.health.HealthCheck;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
