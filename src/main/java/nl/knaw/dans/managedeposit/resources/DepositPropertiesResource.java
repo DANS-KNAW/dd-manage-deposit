@@ -83,27 +83,27 @@ public class DepositPropertiesResource {
 //        return depositPropertiesDAO.findById(depositId.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", depositId.get())));
     }
 
-//    @DELETE
-//    @UnitOfWork
-//    @Produces("application/json")
-//    public void DeleteDepositPropertiesRecord(@Context UriInfo uriInfo) {
-//        for (String key: uriInfo.getQueryParameters().keySet() ){
-//            List<String> value = uriInfo.getQueryParameters().get(key);
-//            System.out.println(value);
-//
-//        }
-//      transactionProcess.performRequest(RequestMethod.GET, uriInfo.getQueryParameters(), null);
-//    }
+    @DELETE
+    @UnitOfWork
+    @Produces("application/json")
+    public void DeleteDepositPropertiesRecord(@Context UriInfo uriInfo) {
+        for (String key: uriInfo.getQueryParameters().keySet() ){
+            List<String> value = uriInfo.getQueryParameters().get(key);
+            System.out.println(value);
 
-        @DELETE //TO_DO : must be replaced with above commented block + need changes in TransactionProcess class
-        @UnitOfWork
-        @Produces("application/json")
-        public DepositProperties DeleteDepositPropertiesRecord(@QueryParam("id") Optional<String> id) {
-            if (id.isEmpty())
-                new ClientErrorException("id parameter is empty", Response.Status.BAD_REQUEST);
-            DepositProperties depositProperties = depositPropertiesDAO.findById(id.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", id.get())));
-            depositPropertiesDAO.delete(depositProperties);
-            return depositProperties;
         }
+      transactionProcess.performRequest(RequestMethod.DELETE, uriInfo.getQueryParameters(), null);
+    }
+
+//        @DELETE //TO_DO : must be replaced with above commented block + need changes in TransactionProcess class
+//        @UnitOfWork
+//        @Produces("application/json")
+//        public DepositProperties DeleteDepositPropertiesRecord(@QueryParam("id") Optional<String> id) {
+//            if (id.isEmpty())
+//                new ClientErrorException("id parameter is empty", Response.Status.BAD_REQUEST);
+//            DepositProperties depositProperties = depositPropertiesDAO.findById(id.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", id.get())));
+//            depositPropertiesDAO.delete(depositProperties);
+//            return depositProperties;
+//        }
 
 }

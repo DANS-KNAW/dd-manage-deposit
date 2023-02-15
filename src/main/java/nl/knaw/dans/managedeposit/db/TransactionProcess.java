@@ -39,7 +39,7 @@ public class TransactionProcess {
         this.sessionFactory = sessionFactory;
     }
 
-    private boolean buildQueryDate(Map<String, List<String>> queryParameters, StringBuilder qureyBuffer) {
+    private boolean buildQueryDate(Map<String, List<String>> queryParameters, StringBuilder queryStringBuildr) {
         boolean addedBeforeDate = false;
         boolean addedAfterDate = false;
 
@@ -52,62 +52,62 @@ public class TransactionProcess {
 
         if(queryParameters.containsKey("createdDateAfter")) {
             if (addedBeforeDate)
-                qureyBuffer.append(" AND ");
+                queryStringBuildr.append(" AND ");
             String dateBefore = queryParameters.get("createdDateAfter").get(0);
             queryParameters.remove("createdDateAfter");
             addedAfterDate = true;
         }
 
         if (addedAfterDate)
-            qureyBuffer.append(" ");
+            queryStringBuildr.append(" ");
 
         return addedBeforeDate || addedBeforeDate;
     }
-    private void buildQuery(RequestMethod requestMethod, Map<String, List<String>> queryParameters, StringBuilder qureyBuffer) {
+    private void buildQuery(RequestMethod requestMethod, Map<String, List<String>> queryParameters, StringBuilder queryStringBuildr) {
         // A suggestion to sessionFactory.getCriteriaBuilder()
         switch (requestMethod) {
             case POST:
                 return;
             case GET:
-                qureyBuffer.append("SELECT dp FROM DepositProperties dp");
+                queryStringBuildr.append("SELECT dp FROM DepositProperties dp");
                 break;
 
             case PUT:
-                qureyBuffer.append("UPDATE * FROM DepositProperties\n");
+                queryStringBuildr.append("UPDATE * FROM DepositProperties");
                 break;
 
             case DELETE:
-                qureyBuffer.append("DELETE * FROM DepositProperties\n");
+                queryStringBuildr.append("DELETE FROM DepositProperties");
                 break;
         }
 
         if (queryParameters.size() > 0)
-            qureyBuffer.append(" WHERE ");
+            queryStringBuildr.append(" WHERE ");
 
-        if ( buildQueryDate(queryParameters, qureyBuffer) && queryParameters.size() > 0)
-            qureyBuffer.append(" AND ");
+        if ( buildQueryDate(queryParameters, queryStringBuildr) && queryParameters.size() > 0)
+            queryStringBuildr.append(" AND ");
 
         int mapIndex = queryParameters.size();
         for (String key : queryParameters.keySet()) {
             List<String> value = queryParameters.get(key);
 
-            qureyBuffer.append(key).append("=");
+            queryStringBuildr.append(key).append("=");
             for (int k = 0; k < value.size(); k++) {
-                qureyBuffer.append("\'").append(value.get(k)).append("\'");
+                queryStringBuildr.append("\'").append(value.get(k)).append("\'");
                 if (k > 1)
-                    qureyBuffer.append(" OR ").append(key).append("=");
+                    queryStringBuildr.append(" OR ").append(key).append("=");
             }
 
             if (mapIndex > 1) {
                 mapIndex--;
-                qureyBuffer.append(" AND ");
+                queryStringBuildr.append(" AND ");
             }
         }
     }
     
 
     public List<DepositProperties> performRequest(RequestMethod requestMethod, Map<String, List<String>> queryParameters, DepositProperties depositProperties) {
-        StringBuilder qureyBuffer = new StringBuilder();
+        StringBuilder queryStringBuildr = new StringBuilder();
         switch (requestMethod) {
             case POST:
                 return List.of(depositPropertiesDAO.create(depositProperties));
@@ -120,16 +120,18 @@ public class TransactionProcess {
                 if (queryParameters.size() == 0)
                     return depositPropertiesDAO.findAll();
 
-                buildQuery(requestMethod, queryParameters, qureyBuffer);
-                Query<DepositProperties> query = sessionFactory.getCurrentSession().createQuery(qureyBuffer.toString(), DepositProperties.class);
-                List<DepositProperties> deposits = query.getResultList();
+                buildQuery(requestMethod, queryParameters, queryStringBuildr);
+                Query<DepositProperties> getQuery = sessionFactory.getCurrentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class);
+                List<DepositProperties> deposits = getQuery.getResultList();
                 return deposits;
-                //List<DepositProperties> deposits = sessionFactory.getCurrentSession().createQuery(qureyBuffer.toString(), DepositProperties.class).getResultList();
+                //List<DepositProperties> deposits = sessionFactory.getCurrentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class).getResultList();
 
 
             case DELETE:
-                buildQuery(requestMethod, queryParameters, qureyBuffer);
-                List<DepositProperties> depositList = sessionFactory.getCurrentSession().createQuery(qureyBuffer.toString(), DepositProperties.class).getResultList();
+                buildQuery(requestMethod, queryParameters, queryStringBuildr);
+                Query<DepositProperties> deleteQuery = sessionFactory.getCurrentSession().createQuery(queryStringBuildr.toString());
+                /*List<DepositProperties> deleteDeposits*/ int x  = deleteQuery.executeUpdate();// getResultList();
+                //return  deleteDeposits;
                 break;
 
             default:
