@@ -17,9 +17,9 @@ package nl.knaw.dans.managedeposit.core.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.knaw.dans.ttv.core.dto.FileContentAttributes;
-import nl.knaw.dans.ttv.core.dto.FilenameAttributes;
-import nl.knaw.dans.ttv.core.dto.FilesystemAttributes;
+import nl.knaw.dans.managedeposit.core.service.FileContentAttributes;
+import nl.knaw.dans.managedeposit.core.service.FilenameAttributes;
+import nl.knaw.dans.managedeposit.core.service.FilesystemAttributes;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;

@@ -16,10 +16,7 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 import io.dropwizard.lifecycle.Managed;
-import nl.knaw.dans.managedeposit.core.config.CollectConfiguration;
-import nl.knaw.dans.managedeposit.core.service.FileService;
-import nl.knaw.dans.managedeposit.core.service.TransferItemMetadataReader;
-import nl.knaw.dans.managedeposit.core.service.TransferItemService;
+import nl.knaw.dans.managedeposit.CollectConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
