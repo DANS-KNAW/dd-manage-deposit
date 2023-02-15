@@ -23,6 +23,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.core.service.InboxWatcherFactoryImpl;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
@@ -54,10 +55,14 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
     @Override
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
         DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(hibernateBundle.getSessionFactory());
+        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
 
-        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
+        final var inboxWatcherFactory = new InboxWatcherFactoryImpl();
+//        final var collectTaskManager = new CollectTaskManager(configuration.getCollect().getInboxes(), configuration.getExtractMetadata().getInbox(), configuration.getCollect().getPollingInterval(),
+//            collectExecutorService, transferItemService, metadataReader, fileService, inboxWatcherFactory);
+
         environment.jersey().register(new CsvMessageBodyWriter());
     }
 

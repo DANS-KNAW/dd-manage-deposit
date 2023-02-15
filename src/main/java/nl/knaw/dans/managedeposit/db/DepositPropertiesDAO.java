@@ -28,13 +28,15 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         super(sessionFactory);
     }
 
-
     public Optional<DepositProperties> findById(String depositId) {
         return Optional.ofNullable(get(depositId));
     }
 
     public DepositProperties create(DepositProperties dp) {
         return persist(dp);
+    }
+    public void merge(DepositProperties dp) {
+        currentSession().merge(dp);
     }
 
     public void delete(DepositProperties dp) {
