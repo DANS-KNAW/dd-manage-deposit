@@ -24,6 +24,7 @@ import io.dropwizard.setup.Environment;
 import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.service.InboxWatcherFactoryImpl;
+import nl.knaw.dans.managedeposit.core.watcherservice.Watcher;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
@@ -59,11 +60,14 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
 
-        final var inboxWatcherFactory = new InboxWatcherFactoryImpl();
+        //final var inboxWatcherFactory = new InboxWatcherFactoryImpl();
 //        final var collectTaskManager = new CollectTaskManager(configuration.getCollect().getInboxes(), configuration.getExtractMetadata().getInbox(), configuration.getCollect().getPollingInterval(),
 //            collectExecutorService, transferItemService, metadataReader, fileService, inboxWatcherFactory);
 
         environment.jersey().register(new CsvMessageBodyWriter());
+
+        final var watcher = new Watcher("data/auto-ingest");
+        watcher.startWatcher();
     }
 
 }
