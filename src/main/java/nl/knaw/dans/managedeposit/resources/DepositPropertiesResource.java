@@ -18,37 +18,27 @@ package nl.knaw.dans.managedeposit.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import nl.knaw.dans.managedeposit.db.RequestMethod;
-import nl.knaw.dans.managedeposit.db.TransactionProcess;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
-import java.util.Optional;
 
 @Path("/")
 public class DepositPropertiesResource {
     private static final Logger log = LoggerFactory.getLogger(DepositPropertiesResource.class);
-    //log.info("Returning service document for user {} and collections {}", depositor, collectionIds);
     private final DepositPropertiesDAO depositPropertiesDAO;
-    private final SessionFactory sessionFactory;
-
-    public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
-        this.sessionFactory = sessionFactory;
     }
 
     @GET
@@ -59,14 +49,6 @@ public class DepositPropertiesResource {
                 "GET path: basePath/report \n" +
                 "POST path: basePath/delete-deposit \n" +
                 "Parameters: user, state, startdate, enddate";
-    }
-
-    @GET
-    @UnitOfWork
-    @Produces("application/json")
-    @Path("/{depositId}")
-    public DepositProperties getDepositId(@PathParam("depositId") Optional<String> depositId) {
-        return depositPropertiesDAO.findById(depositId.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", depositId.orElse(""))));
     }
 
     @POST
@@ -83,7 +65,5 @@ public class DepositPropertiesResource {
     public List<DepositProperties> updateDeposit(@Context UriInfo uriInfo) {
         return depositPropertiesDAO.UpdateSelection(uriInfo.getQueryParameters());
     }
-
-
 
 }

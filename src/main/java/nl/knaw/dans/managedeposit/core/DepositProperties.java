@@ -46,11 +46,8 @@ public class DepositProperties {
     private boolean deleted;
 
     @Column (name="state")
-    @Enumerated(EnumType.STRING) //@Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private State state;
-
-    //@Column(name = "path")
-    //private String path;
 
     public String getDepositId() {
         return depositId;
@@ -93,8 +90,11 @@ public class DepositProperties {
         this.createdDate = createdDate;
     }
 
-    public void setpath(State state) {
+    public void setState(State state) {
         this.state = state;
+    }
+    public void setState(String state) {
+        this.state = State.valueOf(state.toUpperCase());;
     }
 
     public State getState() {
@@ -117,8 +117,7 @@ public class DepositProperties {
 
     @Override
     public int hashCode() {
-        int result = depositId.hashCode();
-        result = 31 * result + createdDate.hashCode();
+        int result = 31 * depositId.hashCode() + createdDate.hashCode();
         return result;
     }
 

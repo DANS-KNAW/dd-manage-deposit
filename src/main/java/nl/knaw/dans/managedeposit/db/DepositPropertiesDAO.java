@@ -17,11 +17,13 @@ package nl.knaw.dans.managedeposit.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.core.State;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
@@ -96,18 +98,31 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     }
 
+    public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
+        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+        CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
+        Root<DepositProperties> root = deleteQuery.from(DepositProperties.class);
+
+        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
+
+        deleteQuery.where(predicate);
+        Query<DepositProperties> query = currentSession().createQuery(deleteQuery);
+        int x = query.executeUpdate();
+        return Optional.ofNullable(x);
+    }
+
     private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {
         List<Predicate> predicates = new ArrayList<>();
         Predicate predicate;
 
         for (String key : queryParameters.keySet()) {
             List<String> values = queryParameters.get(key);
-            key = key.toLowerCase();
+            String parameter = key.toLowerCase();
             //javax.persistence.criteria
             Predicate orPredicate;
             List<Predicate> orPredicates = new ArrayList<>();
             for (String value : values) {
-                switch (key) {
+                switch (parameter) {
                     case "depositid":
                         orPredicate = criteriaBuilder.equal(root.get("depositId"), value);
                         break;
@@ -124,7 +139,8 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                         break;
 
                     case "state":
-                        orPredicate = criteriaBuilder.equal(root.get("state"), value.toUpperCase());
+                        State requestedState = State.valueOf(value.toUpperCase());
+                        orPredicate = criteriaBuilder.equal(root.get("state"), requestedState);
                         break;
 
                     case "startdate":
@@ -133,7 +149,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                         LocalDate date = LocalDate.parse(value, formatter);
                         var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
-                        if (key.equals("startdate"))
+                        if (parameter.equals("startdate"))
                             orPredicate = criteriaBuilder.greaterThan(root.get("createdDate"), asked_date);
                         else
                             orPredicate = criteriaBuilder.lessThan(root.get("createdDate"), asked_date);

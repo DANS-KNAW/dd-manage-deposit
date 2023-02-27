@@ -16,61 +16,37 @@
 package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import nl.knaw.dans.managedeposit.db.RequestMethod;
-import nl.knaw.dans.managedeposit.db.TransactionProcess;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.Valid;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
-import java.util.Optional;
 
 @Path("/delete")
 public class DepositPropertiesDeleteResource {
     private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDeleteResource.class);
-    //log.info("Returning service document for user {} and collections {}", depositor, collectionIds);
     private final DepositPropertiesDAO depositPropertiesDAO;
+    private final SessionFactory sessionFactory;
 
     public DepositPropertiesDeleteResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
         this.depositPropertiesDAO = depositPropertiesDAO;
+        this.sessionFactory = sessionFactory;
     }
-
 
     @DELETE
     @UnitOfWork
-    @Produces("application/json")
-    public void DeleteDepositPropertiesRecord(@Context UriInfo uriInfo) {
-        for (String key: uriInfo.getQueryParameters().keySet() ){
-            List<String> value = uriInfo.getQueryParameters().get(key);
-            System.out.println(value);
-
-        }
-      //transactionProcess.performRequest(RequestMethod.DELETE, uriInfo.getQueryParameters(), null);
+    @Produces("text/plain")
+    public String DeleteDepositPropertiesSelection(@Context UriInfo uriInfo) {
+        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("No deposit with given criteria")));
+        return String.format("Deleted record(s): %d.", deletedNumber);
     }
 
-//        @DELETE //TO_DO : must be replaced with above commented block + need changes in TransactionProcess class
-//        @UnitOfWork
-//        @Produces("application/json")
-//        public DepositProperties DeleteDepositPropertiesRecord(@QueryParam("id") Optional<String> id) {
-//            if (id.isEmpty())
-//                new ClientErrorException("id parameter is empty", Response.Status.BAD_REQUEST);
-//            DepositProperties depositProperties = depositPropertiesDAO.findById(id.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", id.get())));
-//            depositPropertiesDAO.delete(depositProperties);
-//            return depositProperties;
-//        }
 
 }

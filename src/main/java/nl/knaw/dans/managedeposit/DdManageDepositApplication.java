@@ -57,7 +57,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
     @Override
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
         DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(hibernateBundle.getSessionFactory());
-        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
+        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
         environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
         environment.jersey().register(new DepositPropertiesDeleteResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
 
