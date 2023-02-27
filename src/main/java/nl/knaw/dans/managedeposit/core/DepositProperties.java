@@ -17,6 +17,8 @@ package nl.knaw.dans.managedeposit.core;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -25,7 +27,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "deposit_properties")
 @NamedQuery(
-    name = "nl.knaw.dans.managedeposit.core.DepositProperties.findAll",
+    name = "showAll",
     query = "SELECT dp FROM DepositProperties dp"
 )
 //@JsonPropertyOrder({"depositId", "User Name", "deleted", "Created Date"})
@@ -37,21 +39,29 @@ public class DepositProperties {
     @Column(name = "user_name")
     private String userName;
 
-    @Column(name="deleted")
-    private boolean deleted;
     @Column(name="created_date")
     private OffsetDateTime createdDate;
 
-    @Column(name = "state")
+    @Column(name="deleted")
+    private boolean deleted;
+
+    @Column (name="state")
+    @Enumerated(EnumType.STRING) //@Enumerated(EnumType.ORDINAL)
+    private State state;
+
+    //@Column(name = "path")
+    //private String path;
+
     public String getDepositId() {
         return depositId;
     }
     public DepositProperties() {}
 
-    public DepositProperties(String depositId, String userName, boolean isDeleted) {
+    public DepositProperties(String depositId, String userName, State state, boolean isDeleted) {
         this.depositId = depositId;
         this.userName = userName;
         this.deleted = isDeleted;
+        this.state = state;
         // get the current UTC timestamp or creation.timestamp from
         this.createdDate = OffsetDateTime.now();
     }
@@ -83,7 +93,13 @@ public class DepositProperties {
         this.createdDate = createdDate;
     }
 
+    public void setpath(State state) {
+        this.state = state;
+    }
 
+    public State getState() {
+        return state;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -106,17 +122,5 @@ public class DepositProperties {
         return result;
     }
 
-//    @Override
-//    public String toString() {
-//        if (createdDate == null){
-//            createdDate = OffsetDateTime.now();
-//        }
-//        return "DepositProperties{" +
-//            "depositId='" + depositId + '\'' +
-//            ", userName='" + userName + '\'' +
-//            ", deleted='" + deleted + '\'' +
-//            ", createdDate=" + createdDate.toLocalDate() +
-//            '}';
-//    }
 
 }

@@ -39,26 +39,25 @@ import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Optional;
 
-@Path("/")
-public class DepositPropertiesResource {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesResource.class);
+@Path("/report")
+public class DepositPropertiesReportResource {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesReportResource.class);
     //log.info("Returning service document for user {} and collections {}", depositor, collectionIds);
     private final DepositPropertiesDAO depositPropertiesDAO;
-    private final SessionFactory sessionFactory;
+    private final TransactionProcess transactionProcess;
 
-    public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public DepositPropertiesReportResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
         this.depositPropertiesDAO = depositPropertiesDAO;
-        this.sessionFactory = sessionFactory;
+        this.transactionProcess = new TransactionProcess(depositPropertiesDAO, sessionFactory);
     }
 
     @GET
     @UnitOfWork
-    @Produces("text/plain" )
-    public String getApiInformation() {
-            return "DD Manage Deposit is running: \n" +
-                "GET path: basePath/report \n" +
-                "POST path: basePath/delete-deposit \n" +
-                "Parameters: user, state, startdate, enddate";
+    @Produces({ "application/json", "text/csv" })
+    //@Path("/")
+    public List<DepositProperties> listDepositProperties(@Context UriInfo uriInfo) {
+        return depositPropertiesDAO.findSelection(uriInfo.getQueryParameters());
+
     }
 
     @GET
@@ -69,20 +68,6 @@ public class DepositPropertiesResource {
         return depositPropertiesDAO.findById(depositId.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", depositId.orElse(""))));
     }
 
-    @POST
-    @UnitOfWork
-    @Consumes("application/json")
-    @Produces("application/json")
-    public DepositProperties createDepositPropertiesRecord(@Valid DepositProperties depositProperties) {
-        return depositPropertiesDAO.create(depositProperties);
-    }
-
-    @PUT
-    @UnitOfWork
-    @Produces({ "application/json", "text/csv" })
-    public List<DepositProperties> updateDeposit(@Context UriInfo uriInfo) {
-        return depositPropertiesDAO.UpdateSelection(uriInfo.getQueryParameters());
-    }
 
 
 

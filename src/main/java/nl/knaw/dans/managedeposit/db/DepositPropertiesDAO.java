@@ -18,8 +18,22 @@ package nl.knaw.dans.managedeposit.db;
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
@@ -35,6 +49,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
     public DepositProperties create(DepositProperties dp) {
         return persist(dp);
     }
+
     public void merge(DepositProperties dp) {
         currentSession().merge(dp);
     }
@@ -43,12 +58,143 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         currentSession().delete(dp);
     }
 
-
     public List<DepositProperties> findAllDefaultQuery() {
-        return list(namedTypedQuery("nl.knaw.dans.managedeposit.core.DepositProperties.findAll"));
+        return list(namedTypedQuery("showAll"));
     }
 
     public List<DepositProperties> findAll() {
         return currentSession().createQuery("from DepositProperties", DepositProperties.class).list();
     }
+
+    public List<DepositProperties> findSelection(Map<String, List<String>> queryParameters) {
+        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+
+        if (queryParameters.size() == 0)
+            return findAll();
+
+        CriteriaQuery<DepositProperties> criteriaQuery = criteriaBuilder.createQuery(DepositProperties.class);
+        Root<DepositProperties> root = criteriaQuery.from(DepositProperties.class);
+        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
+        criteriaQuery.select(root).where(predicate);
+        Query<DepositProperties> query = currentSession().createQuery(criteriaQuery);
+        return query.getResultList();
+
+        //CriteriaUpdate<DepositProperties> cu = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
+
+        //                Query<DepositProperties> getQuery = currentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class);
+        //                List<DepositProperties> deposits = getQuery.getResultList();
+
+
+        //              List<DepositProperties> deposits = sessionFactory.getCurrentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class).getResultList();
+
+        //            case DELETE:
+        //                buildQueryCriteria(requestMethod, queryParameters, queryStringBuildr);
+        //                Query<DepositProperties> deleteQuery = currentSession().createQuery(queryStringBuildr.toString());
+        //                /*List<DepositProperties> deleteDeposits*/ int x  = deleteQuery.executeUpdate();// getResultList();
+        //                //return  deleteDeposits;
+        //                break;
+
+    }
+
+    private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        Predicate predicate;
+
+        for (String key : queryParameters.keySet()) {
+            List<String> values = queryParameters.get(key);
+            key = key.toLowerCase();
+            //javax.persistence.criteria
+            Predicate orPredicate;
+            List<Predicate> orPredicates = new ArrayList<>();
+            for (String value : values) {
+                switch (key) {
+                    case "depositid":
+                        orPredicate = criteriaBuilder.equal(root.get("depositId"), value);
+                        break;
+
+                    case "user":
+                        orPredicate = criteriaBuilder.equal(root.get("userName"), value);
+                        break;
+
+                    case "deleted":
+                        if (Boolean.parseBoolean(value))
+                            orPredicate = criteriaBuilder.isTrue(root.get("deleted"));
+                        else
+                            orPredicate = criteriaBuilder.isFalse(root.get("deleted"));
+                        break;
+
+                    case "state":
+                        orPredicate = criteriaBuilder.equal(root.get("state"), value.toUpperCase());
+                        break;
+
+                    case "startdate":
+                    case "enddate":
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        LocalDate date = LocalDate.parse(value, formatter);
+                        var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
+
+                        if (key.equals("startdate"))
+                            orPredicate = criteriaBuilder.greaterThan(root.get("createdDate"), asked_date);
+                        else
+                            orPredicate = criteriaBuilder.lessThan(root.get("createdDate"), asked_date);
+                        break;
+
+                    default:
+                        orPredicate = criteriaBuilder.equal(root.get(key), value);
+                }
+
+                orPredicates.add(orPredicate);
+            }
+            orPredicate = criteriaBuilder.or(orPredicates.toArray(new Predicate[0]));
+            predicates.add(orPredicate);
+        }
+
+        predicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+
+        return predicate;
+    }
+
+    public List<DepositProperties> UpdatePath(Map<String, List<String>> queryParameters, String path) {
+        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
+        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
+
+        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
+        criteriaUpdate.where(predicate);
+
+        criteriaUpdate.set("path", path);
+
+        Transaction transaction = currentSession().beginTransaction();
+
+        Query<DepositProperties> query = currentSession().createQuery(criteriaUpdate);
+        List<DepositProperties> deposits = query.getResultList();
+
+        currentSession().createQuery(criteriaUpdate).executeUpdate();
+        transaction.commit();
+
+        return deposits;
+    }
+
+
+    public List<DepositProperties> UpdateSelection(Map<String, List<String>> queryParameters) {
+        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
+        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
+
+        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
+        criteriaUpdate.where(predicate);
+
+//        criteriaUpdate.set("", "");
+
+        Transaction transaction = currentSession().beginTransaction();
+
+        Query<DepositProperties> query = currentSession().createQuery(criteriaUpdate);
+        List<DepositProperties> deposits = query.getResultList();
+
+        currentSession().createQuery(criteriaUpdate).executeUpdate();
+        transaction.commit();
+
+        return deposits;
+    }
+
 }

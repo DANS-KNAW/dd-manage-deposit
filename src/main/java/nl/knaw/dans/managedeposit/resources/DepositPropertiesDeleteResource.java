@@ -39,51 +39,38 @@ import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Optional;
 
-@Path("/")
-public class DepositPropertiesResource {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesResource.class);
+@Path("/delete")
+public class DepositPropertiesDeleteResource {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDeleteResource.class);
     //log.info("Returning service document for user {} and collections {}", depositor, collectionIds);
     private final DepositPropertiesDAO depositPropertiesDAO;
-    private final SessionFactory sessionFactory;
 
-    public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public DepositPropertiesDeleteResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
         this.depositPropertiesDAO = depositPropertiesDAO;
-        this.sessionFactory = sessionFactory;
     }
 
-    @GET
-    @UnitOfWork
-    @Produces("text/plain" )
-    public String getApiInformation() {
-            return "DD Manage Deposit is running: \n" +
-                "GET path: basePath/report \n" +
-                "POST path: basePath/delete-deposit \n" +
-                "Parameters: user, state, startdate, enddate";
-    }
 
-    @GET
+    @DELETE
     @UnitOfWork
     @Produces("application/json")
-    @Path("/{depositId}")
-    public DepositProperties getDepositId(@PathParam("depositId") Optional<String> depositId) {
-        return depositPropertiesDAO.findById(depositId.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", depositId.orElse(""))));
+    public void DeleteDepositPropertiesRecord(@Context UriInfo uriInfo) {
+        for (String key: uriInfo.getQueryParameters().keySet() ){
+            List<String> value = uriInfo.getQueryParameters().get(key);
+            System.out.println(value);
+
+        }
+      //transactionProcess.performRequest(RequestMethod.DELETE, uriInfo.getQueryParameters(), null);
     }
 
-    @POST
-    @UnitOfWork
-    @Consumes("application/json")
-    @Produces("application/json")
-    public DepositProperties createDepositPropertiesRecord(@Valid DepositProperties depositProperties) {
-        return depositPropertiesDAO.create(depositProperties);
-    }
-
-    @PUT
-    @UnitOfWork
-    @Produces({ "application/json", "text/csv" })
-    public List<DepositProperties> updateDeposit(@Context UriInfo uriInfo) {
-        return depositPropertiesDAO.UpdateSelection(uriInfo.getQueryParameters());
-    }
-
-
+//        @DELETE //TO_DO : must be replaced with above commented block + need changes in TransactionProcess class
+//        @UnitOfWork
+//        @Produces("application/json")
+//        public DepositProperties DeleteDepositPropertiesRecord(@QueryParam("id") Optional<String> id) {
+//            if (id.isEmpty())
+//                new ClientErrorException("id parameter is empty", Response.Status.BAD_REQUEST);
+//            DepositProperties depositProperties = depositPropertiesDAO.findById(id.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", id.get())));
+//            depositPropertiesDAO.delete(depositProperties);
+//            return depositProperties;
+//        }
 
 }

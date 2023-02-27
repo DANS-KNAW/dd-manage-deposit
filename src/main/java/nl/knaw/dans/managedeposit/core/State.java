@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.managedeposit.core.service;
+package nl.knaw.dans.managedeposit.core;
 
-import nl.knaw.dans.managedeposit.core.DepositProperties;
-
-public interface TransferItemValidator {
-
-   // void validateTransferItem(TransferItem transferItem) throws InvalidTransferItemException;
+public enum State {
+    INBOX, FAILED, PROCESSED, REJECTED;
 }

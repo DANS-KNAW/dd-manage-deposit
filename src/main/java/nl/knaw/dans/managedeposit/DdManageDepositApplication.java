@@ -23,10 +23,11 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.core.service.InboxWatcherFactoryImpl;
-import nl.knaw.dans.managedeposit.core.watcherservice.Watcher;
+import nl.knaw.dans.managedeposit.core.service.IngestPathMonitor;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesDeleteResource;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesReportResource;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
@@ -57,17 +58,15 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
         DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(hibernateBundle.getSessionFactory());
         environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
+        environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
+        environment.jersey().register(new DepositPropertiesDeleteResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
 
-        //final var inboxWatcherFactory = new InboxWatcherFactoryImpl();
-//        final var collectTaskManager = new CollectTaskManager(configuration.getCollect().getInboxes(), configuration.getExtractMetadata().getInbox(), configuration.getCollect().getPollingInterval(),
-//            collectExecutorService, transferItemService, metadataReader, fileService, inboxWatcherFactory);
-
         environment.jersey().register(new CsvMessageBodyWriter());
 
-        final var watcher = new Watcher("data/auto-ingest");
-        watcher.startWatcher();
+        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest");
+        environment.lifecycle().manage(ingestPathMonitor);
     }
 
 }
