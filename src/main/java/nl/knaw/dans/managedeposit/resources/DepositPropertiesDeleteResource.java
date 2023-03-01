@@ -33,18 +33,16 @@ import java.util.List;
 public class DepositPropertiesDeleteResource {
     private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDeleteResource.class);
     private final DepositPropertiesDAO depositPropertiesDAO;
-    private final SessionFactory sessionFactory;
 
-    public DepositPropertiesDeleteResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public DepositPropertiesDeleteResource(DepositPropertiesDAO depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
-        this.sessionFactory = sessionFactory;
     }
 
     @DELETE
     @UnitOfWork
     @Produces("text/plain")
     public String DeleteDepositPropertiesSelection(@Context UriInfo uriInfo) {
-        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("No deposit with given criteria")));
+        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("Not such deposit with given criteria")));
         return String.format("Deleted record(s): %d.", deletedNumber);
     }
 

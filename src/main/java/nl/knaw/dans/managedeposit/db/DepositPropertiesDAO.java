@@ -20,6 +20,7 @@ import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.State;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.context.internal.ManagedSessionContext;
 import org.hibernate.query.Query;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -42,6 +43,10 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public DepositPropertiesDAO(SessionFactory sessionFactory) {
         super(sessionFactory);
+    }
+
+    public void bindToSession() {
+        ManagedSessionContext.bind(currentSession());
     }
 
     public Optional<DepositProperties> findById(String depositId) {

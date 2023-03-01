@@ -37,7 +37,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
     }
 
     private final HibernateBundle<DdManageDepositConfiguration> hibernateBundle =
-        new HibernateBundle<DdManageDepositConfiguration>(DepositProperties.class) {
+        new HibernateBundle<>(DepositProperties.class) {
             @Override
             public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
                 return  configuration.getDepositPropertiesDatabase();
@@ -59,13 +59,13 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
         DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(hibernateBundle.getSessionFactory());
         environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
         environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
-        environment.jersey().register(new DepositPropertiesDeleteResource(depositPropertiesDAO, hibernateBundle.getSessionFactory()));
+        environment.jersey().register(new DepositPropertiesDeleteResource(depositPropertiesDAO));
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
 
         environment.jersey().register(new CsvMessageBodyWriter());
 
-        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest");
+        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest", depositPropertiesDAO, hibernateBundle.getSessionFactory());
         environment.lifecycle().manage(ingestPathMonitor);
     }
 

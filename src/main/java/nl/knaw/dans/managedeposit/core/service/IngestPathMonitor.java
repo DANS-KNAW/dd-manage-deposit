@@ -16,9 +16,15 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 import io.dropwizard.lifecycle.Managed;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.HiddenFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,31 +39,34 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     private static final Logger log = LoggerFactory.getLogger(IngestPathMonitor.class);
     private final Path monitorPath;
     private FileAlterationMonitor monitor;
+    private final PathUpdate pathUpdate;
 
-    public IngestPathMonitor(String path) {
-            this.monitorPath = Path.of(path);
+    public IngestPathMonitor(String path, DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+        this.monitorPath = Path.of(path);
+        this.pathUpdate = new PathUpdate(depositPropertiesDAO, sessionFactory);
     }
 
-
     private void startMonitor() throws Exception {
-//        IOFileFilter fileFilter = FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE);
+        IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(), HiddenFileFilter.VISIBLE);
+        IOFileFilter files       = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
+        IOFileFilter filter      = FileFilterUtils.or(directories, files);
 
-//        FileAlterationObserver observer = new FileAlterationObserver(monitorPath.toFile(), fileFilter);
-        FileAlterationObserver observer = new FileAlterationObserver(monitorPath.toFile());
+        FileAlterationObserver observer = new FileAlterationObserver(monitorPath.toFile(), filter);
+
         observer.addListener(this);
+        //observer.addListener(pathUpdate);
 
         monitor = new FileAlterationMonitor(this.POLLING_INTERVAL, observer);
+        log.info("Starting file alteration monitor for path '{}', file filter: deposit.properties", this.monitorPath);
         monitor.start();
     }
 
     @Override
     public void start() throws Exception {
         try {
-            // initial scan
-//            log.info("Scanning path '{}' for first run", this.monitorPath);
-            scanExistingFiles();
+            //log.info("initial scan - Scanning path '{}' for first run", this.monitorPath);
+            // scanExistingFiles();
 
-//            log.info("Starting file alteration monitor for path '{}'", this.monitorPath);
             startMonitor();
         }
         catch (IOException | InterruptedException e) {
@@ -73,46 +82,36 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
     @Override
     public void onFileCreate(File file) {
-        Path expected = Path.of(this.monitorPath.toString(), file.getName());
-//        log.debug("Comparing directories: '{}' vs '{}'", file.toPath(), expected);
-        System.out.format("onFileCreate:  file.getName(): %s - file.getParent(): %s\n", file.getName(), file.getParent());
-        if (!file.toPath().equals(expected)) {
-//            log.warn("File found in non-root directory, ignoring");
-            System.out.format("onFileCreate: file.getName(): %s - monitorPath %s - file.toPath(): %S\n", file.getName(), this.monitorPath.toString(), file.getName(), file.toPath().toString());
-        }
+        log.debug("onFileCreate: '{}'",file.toPath());
+        System.out.format("onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", file.getName(), this.monitorPath, file.getParent(), file.toPath());
 
-        //  ALI_lookat-->      this.callback.onFileCreate(file, datastationName);
+        pathUpdate.onCreateDeposit(file);
     }
 
     @Override
     public void onFileDelete (File file) {
-        Path expected = Path.of(this.monitorPath.toString(), file.getName());
-        //        log.debug("Comparing directories: '{}' vs '{}'", file.toPath(), expected);
-        System.out.format("onFileDelete:  file.getName(): %s - file.getParent(): %s\n", file.getName(), file.getParent());
-        if (!file.toPath().equals(expected)) {
-            //            log.warn("File found in non-root directory, ignoring");
-            System.out.format("onFileDelete: file.getName(): %s - monitorPath %s - file.toPath(): %S\n", file.getName(), this.monitorPath.toString(), file.getName(), file.toPath().toString());
-        }
+        log.debug("onFileDelete: '{}'",file.toPath());
+        System.out.format("onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", file.getName(), this.monitorPath, file.getParent(), file.toPath());
 
-        //  ALI_lookat-->      this.callback.onFileCreate(file, datastationName);
+        pathUpdate.onDeleteDeposit(file);
     }
 
     @Override
     public void onFileChange(File file) {
-        Path expected = Path.of(this.monitorPath.toString(), file.getName());
-        //        log.debug("Comparing directories: '{}' vs '{}'", file.toPath(), expected);
-        System.out.format("onFileChange:  file.getName(): %s - file.getParent(): %s\n", file.getName(), file.getParent());
-        if (!file.toPath().equals(expected)) {
-            //            log.warn("File found in non-root directory, ignoring");
-            System.out.format("onFileChange: file.getName(): %s - monitorPath %s - file.toPath(): %S\n", file.getName(), this.monitorPath.toString(), file.getName(), file.toPath().toString());
-        }
+        log.debug("onFileChange: '{}'",file.toPath());
+        System.out.format("onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", file.getName(), this.monitorPath, file.getParent(), file.toPath());
 
-        //  ALI_lookat-->      this.callback.onFileCreate(file, datastationName);
+        pathUpdate.onMoveDeposit(file);
+    }
+
+    @Override
+    public void onDirectoryChange(File dir) {
+        log.debug("onDirectoryChange: '{}'",dir.toPath());
+        System.out.format("onDirectoryChange:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
     }
 
     private void scanExistingFiles() throws IOException {
         Files.list(this.monitorPath).forEach(f -> onFileCreate(f.toFile()));
     }
-
 
 }
