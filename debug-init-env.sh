@@ -19,3 +19,12 @@ echo -n "Pre-creating log..."
 TEMPDIR=data
 touch $TEMPDIR/dd-manage-deposit.log
 echo "OK"
+
+echo -n "Creating test directories..."
+mkdir -p $TEMPDIR/auto-ingest/inbox
+mkdir -p $TEMPDIR/auto-ingest/outbox/processed
+mkdir -p $TEMPDIR/auto-ingest/outbox/rejected
+mkdir -p $TEMPDIR/auto-ingest/outbox/failed
+mkdir -p $TEMPDIR/sword2-uploads
+mkdir -p $TEMPDIR/tmp
+echo "OK"

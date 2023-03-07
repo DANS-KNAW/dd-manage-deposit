@@ -17,14 +17,35 @@
 package nl.knaw.dans.managedeposit;
 
 import io.dropwizard.Application;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
+import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.core.service.IngestPathMonitor;
+import nl.knaw.dans.managedeposit.core.service.PathUpdate;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesDeleteResource;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesReportResource;
+import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
+import org.hibernate.SessionFactory;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
     public static void main(final String[] args) throws Exception {
         new DdManageDepositApplication().run(args);
     }
+
+    private final HibernateBundle<DdManageDepositConfiguration> depositPropertiesHibernate =
+        new HibernateBundle<>(DepositProperties.class) {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
+                return  configuration.getDepositPropertiesDatabase();
+            }
+        };
 
     @Override
     public String getName() {
@@ -33,12 +54,25 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
     @Override
     public void initialize(final Bootstrap<DdManageDepositConfiguration> bootstrap) {
-        // TODO: application initialization
+        bootstrap.addBundle(depositPropertiesHibernate);
     }
 
     @Override
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
+        DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(depositPropertiesHibernate.getSessionFactory());
+        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
+        environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO, depositPropertiesHibernate.getSessionFactory()));
+        environment.jersey().register(new DepositPropertiesDeleteResource(depositPropertiesDAO));
 
+        environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
+
+        environment.jersey().register(new CsvMessageBodyWriter());
+
+        UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
+        PathUpdate pathUpdate = proxyFactory.create(PathUpdate.class, new Class[] {DepositPropertiesDAO.class, SessionFactory.class}, new Object[] {depositPropertiesDAO, depositPropertiesHibernate.getSessionFactory()});
+
+        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest", pathUpdate);
+        environment.lifecycle().manage(ingestPathMonitor);
     }
 
 }
