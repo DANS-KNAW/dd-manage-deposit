@@ -20,7 +20,6 @@ import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.State;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.context.internal.ManagedSessionContext;
 import org.hibernate.query.Query;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -31,7 +30,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,10 +41,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public DepositPropertiesDAO(SessionFactory sessionFactory) {
         super(sessionFactory);
-    }
-
-    public void bindToSession() {
-        ManagedSessionContext.bind(currentSession());
     }
 
     public Optional<DepositProperties> findById(String depositId) {
@@ -63,6 +57,11 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public void delete(DepositProperties dp) {
         currentSession().delete(dp);
+        //        if (Optional.ofNullable(currentSession().find(DepositProperties.class, dp)) != null) {
+        //            currentSession().delete(dp);
+        //            Optional.ofNullable(0);
+        //        }
+        //        return Optional.ofNullable(1);
     }
 
     public List<DepositProperties> findAllDefaultQuery() {
@@ -91,16 +90,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         //                Query<DepositProperties> getQuery = currentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class);
         //                List<DepositProperties> deposits = getQuery.getResultList();
 
-
         //              List<DepositProperties> deposits = sessionFactory.getCurrentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class).getResultList();
-
-        //            case DELETE:
-        //                buildQueryCriteria(requestMethod, queryParameters, queryStringBuildr);
-        //                Query<DepositProperties> deleteQuery = currentSession().createQuery(queryStringBuildr.toString());
-        //                /*List<DepositProperties> deleteDeposits*/ int x  = deleteQuery.executeUpdate();// getResultList();
-        //                //return  deleteDeposits;
-        //                break;
-
     }
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
@@ -196,7 +186,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return deposits;
     }
 
-
     public List<DepositProperties> UpdateSelection(Map<String, List<String>> queryParameters) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
@@ -205,7 +194,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
         criteriaUpdate.where(predicate);
 
-//        criteriaUpdate.set("", "");
+        //        criteriaUpdate.set("", "");
 
         Transaction transaction = currentSession().beginTransaction();
 

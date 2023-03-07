@@ -15,18 +15,16 @@
  */
 package nl.knaw.dans.managedeposit.core.service;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.core.State;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.io.monitor.FileAlterationListener;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.hibernate.SessionFactory;
-import org.hibernate.context.internal.ManagedSessionContext;
 
 import java.io.File;
 
-//public  class PathUpdate implements FileAlterationListener{
 public  class PathUpdate {
     private final DepositPropertiesDAO depositPropertiesDAO;
     private final SessionFactory hibernateSessionFactory;
@@ -36,23 +34,22 @@ public  class PathUpdate {
         this.hibernateSessionFactory = sessionFactory;
     }
 
-
+    @UnitOfWork
     public void onCreateDeposit(File file) {
         Configuration configuration;
         try {
             configuration = ReadDepositProperties.readDepositProperties(file.toPath());
             DepositProperties dp = new DepositProperties(configuration.getString("depositId"),
-                configuration.getString("userName"), null /*State.INBOX*/, false);
+                configuration.getString("userName"), State.INBOX, false);
 
-//            //depositPropertiesDAO.bindToSession();
-//            ManagedSessionContext.bind(hibernateSessionFactory.getCurrentSession());
-//            DepositProperties dp2 = depositPropertiesDAO.create(dp);
+            DepositProperties dp2 = depositPropertiesDAO.create(dp);
         }
         catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @UnitOfWork
     public void onMoveDeposit(File file) {
         Configuration configuration;
         try {
@@ -66,6 +63,7 @@ public  class PathUpdate {
         }
     }
 
+    @UnitOfWork
     public void onDeleteDeposit(File file) {
         Configuration configuration;
         try {

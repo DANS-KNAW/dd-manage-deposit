@@ -16,7 +16,6 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 import io.dropwizard.lifecycle.Managed;
-import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.HiddenFileFilter;
@@ -24,7 +23,6 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +39,9 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     private FileAlterationMonitor monitor;
     private final PathUpdate pathUpdate;
 
-    public IngestPathMonitor(String path, DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public IngestPathMonitor(String path, PathUpdate pathUpdate) {
         this.monitorPath = Path.of(path);
-        this.pathUpdate = new PathUpdate(depositPropertiesDAO, sessionFactory);
+        this.pathUpdate = pathUpdate;
     }
 
     private void startMonitor() throws Exception {
@@ -54,7 +52,6 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
         FileAlterationObserver observer = new FileAlterationObserver(monitorPath.toFile(), filter);
 
         observer.addListener(this);
-        //observer.addListener(pathUpdate);
 
         monitor = new FileAlterationMonitor(this.POLLING_INTERVAL, observer);
         log.info("Starting file alteration monitor for path '{}', file filter: deposit.properties", this.monitorPath);
@@ -64,9 +61,6 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     @Override
     public void start() throws Exception {
         try {
-            //log.info("initial scan - Scanning path '{}' for first run", this.monitorPath);
-            // scanExistingFiles();
-
             startMonitor();
         }
         catch (IOException | InterruptedException e) {

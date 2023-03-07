@@ -30,6 +30,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 
@@ -44,11 +46,17 @@ public class DepositPropertiesResource {
     @GET
     @UnitOfWork
     @Produces("text/plain" )
-    public String getApiInformation() {
-            return "DD Manage Deposit is running: \n" +
+    public Response getApiInformation() {
+            String response =  "DD Manage Deposit is running: \n" +
                 "GET path: basePath/report \n" +
                 "POST path: basePath/delete-deposit \n" +
                 "Parameters: user, state, startdate, enddate";
+
+        return Response
+            .status(Response.Status.OK)
+            .entity(response)
+            .type(MediaType.TEXT_PLAIN)
+            .build();
     }
 
     @POST
