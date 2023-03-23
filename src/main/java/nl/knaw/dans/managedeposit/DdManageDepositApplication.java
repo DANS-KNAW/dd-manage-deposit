@@ -61,7 +61,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
         DepositPropertiesDAO depositPropertiesDAO = new DepositPropertiesDAO(depositPropertiesHibernate.getSessionFactory());
         environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
-        environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO, depositPropertiesHibernate.getSessionFactory()));
+        environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO));
         environment.jersey().register(new DepositPropertiesDeleteResource(depositPropertiesDAO));
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));

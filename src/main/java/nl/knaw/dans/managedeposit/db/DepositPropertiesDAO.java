@@ -19,7 +19,6 @@ import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.State;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -95,13 +94,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         criteriaQuery.select(root).where(predicate);
         Query<DepositProperties> query = currentSession().createQuery(criteriaQuery);
         return query.getResultList();
-
-        //CriteriaUpdate<DepositProperties> cu = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
-
-        //                Query<DepositProperties> getQuery = currentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class);
-        //                List<DepositProperties> deposits = getQuery.getResultList();
-
-        //              List<DepositProperties> deposits = sessionFactory.getCurrentSession().createQuery(queryStringBuildr.toString(), DepositProperties.class).getResultList();
     }
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
@@ -114,7 +106,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         deleteQuery.where(predicate);
         Query<DepositProperties> query = currentSession().createQuery(deleteQuery);
         int x = query.executeUpdate();
-        return Optional.ofNullable(x);
+        return Optional.of(x);
     }
 
     private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {
@@ -176,8 +168,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return predicate;
     }
 
-//    public List<DepositProperties> UpdatePath(Map<String, List<String>> queryParameters, String path) {
-    public List<DepositProperties> updateDeleteFlag(String depositPath, boolean deleted) {
+    public Optional<Integer> updateDeleteFlag(String depositPath, boolean deleted) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
@@ -185,20 +176,15 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         Predicate predicate = buildQueryCriteria(Map.of("depositPath",List.of(depositPath)), criteriaBuilder, root);
         criteriaUpdate.where(predicate);
 
-        criteriaUpdate.set("deleted", true);
-
-        Transaction transaction = currentSession().beginTransaction();
+        criteriaUpdate.set("deleted", deleted);
 
         Query<DepositProperties> query = currentSession().createQuery(criteriaUpdate);
-        List<DepositProperties> deposits = query.getResultList();
 
-        currentSession().createQuery(criteriaUpdate).executeUpdate();
-        transaction.commit();
-
-        return deposits;
+        int x = query.executeUpdate();
+        return Optional.of(x);
     }
 
-    public List<DepositProperties> UpdateSelection(Map<String, List<String>> queryParameters) {
+    public Optional<Integer> UpdateSelection(Map<String, List<String>> queryParameters) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
@@ -208,15 +194,10 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
         //        criteriaUpdate.set("", "");
 
-        Transaction transaction = currentSession().beginTransaction();
-
         Query<DepositProperties> query = currentSession().createQuery(criteriaUpdate);
-        List<DepositProperties> deposits = query.getResultList();
 
-        currentSession().createQuery(criteriaUpdate).executeUpdate();
-        transaction.commit();
-
-        return deposits;
+        int x = query.executeUpdate();
+        return Optional.of(x);
     }
 
 }

@@ -35,27 +35,25 @@ public  class DepositStatusUpdater {
     }
 
     @UnitOfWork
-    public void onCreateDeposit(Path filePath) {
-        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(filePath, false);
+    public void onCreateDeposit(Path depositPropertiesPath) {
+        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
         if ( dpObject.isPresent() ) {
             depositPropertiesDAO.save(dpObject.get());
         }
     }
 
     @UnitOfWork
-    public void onChangeDeposit(Path filePath) {
-        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(filePath, false);
+    public void onChangeDeposit(Path depositPropertiesPath) {
+        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
         if ( dpObject.isPresent() ) {
             depositPropertiesDAO.save(dpObject.get());
         }
     }
 
     @UnitOfWork
-    public void onDeleteDeposit(Path filePath) {
-        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(filePath, true);
-        if ( dpObject.isPresent() ) {
-            depositPropertiesDAO.updateDeleteFlag(dpObject.get().getDepositPath(), dpObject.get().isDeleted());
-        }
+    public void onDeleteDeposit(Path depositPropertiesPath) {
+        // At this stage, the deposit.properties file's handle is present but the content is null (impossible to read data of the file)
+        depositPropertiesDAO.updateDeleteFlag(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(), true);
     }
 
 }

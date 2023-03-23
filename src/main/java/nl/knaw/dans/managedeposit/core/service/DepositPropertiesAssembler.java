@@ -28,9 +28,8 @@ class DepositPropertiesAssembler {
      }
 
      Optional<DepositProperties> assembleObject(Path depositPropertiesPath, boolean deleted) {
-         Path statusPath = depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3);
-         System.out.println("assembleObject: " + statusPath);
-         DepositProperties dp = null;
+         System.out.println("assembleObject: " + (depositPropertiesPath.getNameCount() - 3));
+         DepositProperties dp; // = null
          Configuration configuration;
          try {
              configuration = ReadDepositProperties.readDepositProperties(depositPropertiesPath);
@@ -38,15 +37,15 @@ class DepositPropertiesAssembler {
                  configuration.getString("userName"),
                  //State.valueOf(configuration.getString("state").toUpperCase()),
                  State.INBOX,
-                 statusPath.toString(),
-                 depositPropertiesPath.getParent().toString(),
+                 depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toString(),
+                 depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
                  deleted);
 
          }
          catch (ConfigurationException e) {
              throw new RuntimeException(e);
          }
-         return Optional.ofNullable(dp);
+         return Optional.of(dp);
      }
 
      }

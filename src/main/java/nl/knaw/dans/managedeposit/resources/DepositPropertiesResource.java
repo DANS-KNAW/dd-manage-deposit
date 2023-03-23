@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -71,8 +72,9 @@ public class DepositPropertiesResource {
     @PUT
     @UnitOfWork
     @Produces({ "application/json", "text/csv" })
-    public List<DepositProperties> updateDeposit(@Context UriInfo uriInfo) {
-        return depositPropertiesDAO.UpdateSelection(uriInfo.getQueryParameters());
+    public String updateDeposit(@Context UriInfo uriInfo) {
+        int updatedNumber = depositPropertiesDAO.UpdateSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("Not such deposit with given criteria")));
+        return String.format("Updated record(s): %d.", updatedNumber);
     }
 
 }

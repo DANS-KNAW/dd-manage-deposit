@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
 
@@ -112,10 +111,6 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     public void onDirectoryDelete(File dir) {
 //        log.debug("onDirectoryDelete: '{}'",dir.toPath());
         System.out.format("onDirectoryDelete:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
-    }
-
-    private void scanExistingFiles() throws IOException {
-        Files.list(this.monitorPath).forEach(f -> onFileCreate(f.toFile()));
     }
 
 }

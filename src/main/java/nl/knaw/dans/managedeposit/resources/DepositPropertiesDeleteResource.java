@@ -30,7 +30,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 @Path("/delete-deposit")
@@ -46,7 +45,7 @@ public class DepositPropertiesDeleteResource {
     @UnitOfWork
     @Produces("text/plain")
     public String DeleteDepositPropertiesSelection(@Context UriInfo uriInfo) {
-        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("Not such deposit with given criteria")));
+        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException("Not such deposit with given criteria"));
         return String.format("Deleted record(s): %d.", deletedNumber);
     }
 
@@ -55,7 +54,7 @@ public class DepositPropertiesDeleteResource {
     @Produces("text/plain")
     @Consumes(MediaType.TEXT_PLAIN)
     public String DeleteDepositPropertiesUsingParams(@Context UriInfo uriInfo){
-        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("Not such deposit with given criteria")));
+        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException("Not such deposit with given criteria"));
         return String.format("Deleted record(s): %d.", deletedNumber);
     }
 

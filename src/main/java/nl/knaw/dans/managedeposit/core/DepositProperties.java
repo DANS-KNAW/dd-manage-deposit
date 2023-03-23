@@ -39,20 +39,20 @@ public class DepositProperties {
     @Column(name = "user_name")
     private String userName;
 
-    @Column(name="created_date")
+    @Column(name = "created_date")
     private OffsetDateTime createdDate;
 
-    @Column(name="deleted")
+    @Column(name = "deleted")
     private boolean deleted;
 
-    @Column (name="state")
+    @Column (name = "state")
     @Enumerated(EnumType.STRING)
     private State state;
 
-    @Column(name="status-path")
+    @Column(name = "status_path")
     private String statusPath;
 
-    @Column(name="deposit-path")
+    @Column(name = "deposit_path")
     private String depositPath;
 
     public String getDepositId() {
@@ -103,11 +103,27 @@ public class DepositProperties {
         this.state = state;
     }
     public void setState(String state) {
-        this.state = State.valueOf(state.toUpperCase());;
+        this.state = State.valueOf(state.toUpperCase());
     }
 
     public State getState() {
         return state;
+    }
+
+    public String getStatusPath() {
+        return statusPath;
+    }
+
+    public void setStatusPath(String statusPath) {
+        this.statusPath = statusPath;
+    }
+
+    public String getDepositPath() {
+        return depositPath;
+    }
+
+    public void setDepositPath(String depositPath) {
+        this.depositPath = depositPath;
     }
 
     @Override
@@ -126,23 +142,6 @@ public class DepositProperties {
 
     @Override
     public int hashCode() {
-        int result = 31 * depositId.hashCode() + createdDate.hashCode();
-        return result;
-    }
-
-    public String getStatusPath() {
-        return statusPath;
-    }
-
-    public void setStatusPath(String statusPath) {
-        this.statusPath = statusPath;
-    }
-
-    public String getDepositPath() {
-        return depositPath;
-    }
-
-    public void setDepositPath(String depositPath) {
-        this.depositPath = depositPath;
+        return 31 * depositId.hashCode() + createdDate.hashCode();
     }
 }

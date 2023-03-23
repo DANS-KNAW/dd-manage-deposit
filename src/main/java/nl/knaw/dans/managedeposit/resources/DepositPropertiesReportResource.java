@@ -36,11 +36,9 @@ import java.util.Optional;
 public class DepositPropertiesReportResource {
     private static final Logger log = LoggerFactory.getLogger(DepositPropertiesReportResource.class);
     private final DepositPropertiesDAO depositPropertiesDAO;
-    private final SessionFactory sessionFactory;
 
-    public DepositPropertiesReportResource(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public DepositPropertiesReportResource(DepositPropertiesDAO depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
-        this.sessionFactory = sessionFactory;
     }
     @GET
     @UnitOfWork
