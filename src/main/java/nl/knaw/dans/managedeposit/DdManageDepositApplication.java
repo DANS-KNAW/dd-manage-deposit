@@ -24,8 +24,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.core.service.DepositStatusUpdater;
 import nl.knaw.dans.managedeposit.core.service.IngestPathMonitor;
-import nl.knaw.dans.managedeposit.core.service.PathUpdate;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesDeleteResource;
@@ -68,11 +68,15 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
         environment.jersey().register(new CsvMessageBodyWriter());
 
-        UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
-        PathUpdate pathUpdate = proxyFactory.create(PathUpdate.class, new Class[] {DepositPropertiesDAO.class, SessionFactory.class}, new Object[] {depositPropertiesDAO, depositPropertiesHibernate.getSessionFactory()});
+        final UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
+        DepositStatusUpdater depositStatusUpdater = proxyFactory.create(
+            DepositStatusUpdater.class,
+            new Class[] {DepositPropertiesDAO.class, SessionFactory.class},
+            new Object[] {depositPropertiesDAO, depositPropertiesHibernate.getSessionFactory()});
 
-        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest", pathUpdate);
+        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest", depositStatusUpdater);
         environment.lifecycle().manage(ingestPathMonitor);
+
     }
 
 }

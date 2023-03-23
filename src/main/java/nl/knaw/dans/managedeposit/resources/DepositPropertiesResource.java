@@ -47,9 +47,10 @@ public class DepositPropertiesResource {
     @UnitOfWork
     @Produces("text/plain" )
     public Response getApiInformation() {
-            String response =  "DD Manage Deposit is running: \n" +
-                "GET path: basePath/report \n" +
-                "POST path: basePath/delete-deposit \n" +
+            String response =  "DD Manage Deposit is running. Usage: \n" +
+                "- POST path: basePath/" +
+                "- GET path: basePath/report \n" +
+                "- DELETE path: basePath/-delete-deposit \n" +
                 "Parameters: user, state, startdate, enddate";
 
         return Response

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalTime;
 
 public class IngestPathMonitor extends FileAlterationListenerAdaptor implements Managed {
     final long POLLING_INTERVAL = 3 * 1000;
@@ -37,11 +38,11 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     private static final Logger log = LoggerFactory.getLogger(IngestPathMonitor.class);
     private final Path monitorPath;
     private FileAlterationMonitor monitor;
-    private final PathUpdate pathUpdate;
+    private final DepositStatusUpdater depositStatusUpdater;
 
-    public IngestPathMonitor(String path, PathUpdate pathUpdate) {
+    public IngestPathMonitor(String path, DepositStatusUpdater depositStatusUpdater) {
         this.monitorPath = Path.of(path);
-        this.pathUpdate = pathUpdate;
+        this.depositStatusUpdater = depositStatusUpdater;
     }
 
     private void startMonitor() throws Exception {
@@ -76,32 +77,41 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
     @Override
     public void onFileCreate(File file) {
-        log.debug("onFileCreate: '{}'",file.toPath());
-        System.out.format("onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", file.getName(), this.monitorPath, file.getParent(), file.toPath());
-
-        pathUpdate.onCreateDeposit(file);
+//        log.debug("onFileCreate: '{}'",file.getPath());
+        System.out.format("[%s] onFileCreate:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", LocalTime.now(), file.getName(), this.monitorPath, file.getParent(), file.toPath());
+        depositStatusUpdater.onCreateDeposit(file.toPath());
     }
 
     @Override
     public void onFileDelete (File file) {
-        log.debug("onFileDelete: '{}'",file.toPath());
-        System.out.format("onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", file.getName(), this.monitorPath, file.getParent(), file.toPath());
-
-        pathUpdate.onDeleteDeposit(file);
+//        log.debug("onFileDelete: '{}'",file.getPath);
+        System.out.format("[%s] onFileDelete:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", LocalTime.now(), file.getName(), this.monitorPath, file.getParent(), file.toPath());
+        depositStatusUpdater.onDeleteDeposit(file.toPath());
     }
 
     @Override
     public void onFileChange(File file) {
-        log.debug("onFileChange: '{}'",file.toPath());
-        System.out.format("onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", file.getName(), this.monitorPath, file.getParent(), file.toPath());
-
-        pathUpdate.onMoveDeposit(file);
+//        log.debug("onFileChange: '{}'",file.toPath());
+        System.out.format("[%s]  onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", LocalTime.now(), file.getName(), this.monitorPath, file.getParent(), file.toPath());
+        depositStatusUpdater.onChangeDeposit(file.toPath());
     }
 
     @Override
     public void onDirectoryChange(File dir) {
-        log.debug("onDirectoryChange: '{}'",dir.toPath());
+//        log.debug("onDirectoryChange: '{}'",dir.toPath());
         System.out.format("onDirectoryChange:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
+    }
+//
+//    @Override
+//    public void onDirectoryCreate (File dir) {
+//        log.debug("onDirectoryCreate: '{}'",dir.toPath());
+//        System.out.format("onDirectoryCreate:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
+//    }
+//
+    @Override
+    public void onDirectoryDelete(File dir) {
+//        log.debug("onDirectoryDelete: '{}'",dir.toPath());
+        System.out.format("onDirectoryDelete:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
     }
 
     private void scanExistingFiles() throws IOException {

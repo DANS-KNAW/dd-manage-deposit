@@ -51,9 +51,20 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return persist(dp);
     }
 
+    public DepositProperties save(DepositProperties dp) {
+        return persist(dp);
+    }
+
     public void merge(DepositProperties dp) {
         currentSession().merge(dp);
     }
+
+//    public void updateDeleteFlag(String depositPath, boolean deleted) {
+//        int r = currentSession()
+//            .createQuery("DELETE FROM ExpectedDataset WHERE doi = :doi")
+//            .setParameter("doi", doi)
+//            .executeUpdate();
+//    }
 
     public void delete(DepositProperties dp) {
         currentSession().delete(dp);
@@ -165,15 +176,16 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return predicate;
     }
 
-    public List<DepositProperties> UpdatePath(Map<String, List<String>> queryParameters, String path) {
+//    public List<DepositProperties> UpdatePath(Map<String, List<String>> queryParameters, String path) {
+    public List<DepositProperties> updateDeleteFlag(String depositPath, boolean deleted) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
 
-        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
+        Predicate predicate = buildQueryCriteria(Map.of("depositPath",List.of(depositPath)), criteriaBuilder, root);
         criteriaUpdate.where(predicate);
 
-        criteriaUpdate.set("path", path);
+        criteriaUpdate.set("deleted", true);
 
         Transaction transaction = currentSession().beginTransaction();
 

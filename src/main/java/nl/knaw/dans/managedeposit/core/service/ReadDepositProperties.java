@@ -22,7 +22,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
-public class ReadDepositProperties {
+class ReadDepositProperties {
 
     static public Configuration readDepositProperties(Path propertiesFile) throws ConfigurationException {
         Parameters params = new Parameters();

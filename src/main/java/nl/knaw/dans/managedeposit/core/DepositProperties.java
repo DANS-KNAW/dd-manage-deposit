@@ -49,16 +49,25 @@ public class DepositProperties {
     @Enumerated(EnumType.STRING)
     private State state;
 
+    @Column(name="status-path")
+    private String statusPath;
+
+    @Column(name="deposit-path")
+    private String depositPath;
+
     public String getDepositId() {
         return depositId;
     }
     public DepositProperties() {}
 
-    public DepositProperties(String depositId, String userName, State state, boolean isDeleted) {
+    public DepositProperties(String depositId, String userName, State state, String statusPath, String depositPath, boolean isDeleted) {
         this.depositId = depositId;
         this.userName = userName;
         this.deleted = isDeleted;
         this.state = state;
+        this.statusPath = statusPath;
+        this.depositPath = depositPath;
+
         // get the current UTC timestamp or creation.timestamp from
         this.createdDate = OffsetDateTime.now();
     }
@@ -121,5 +130,19 @@ public class DepositProperties {
         return result;
     }
 
+    public String getStatusPath() {
+        return statusPath;
+    }
 
+    public void setStatusPath(String statusPath) {
+        this.statusPath = statusPath;
+    }
+
+    public String getDepositPath() {
+        return depositPath;
+    }
+
+    public void setDepositPath(String depositPath) {
+        this.depositPath = depositPath;
+    }
 }
