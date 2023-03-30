@@ -49,8 +49,9 @@ public class DepositStatusUpdater {
     @UnitOfWork
     public void onDeleteDeposit(Path depositPropertiesPath) {
         // At this stage, the deposit.properties file's handle is present but the content is null (impossible to read data of the file)
-        Optional<Integer> deletedNumber = depositPropertiesDAO.updateDeleteFlag(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(), true);
-        log.debug("onDeleteDeposit - 'deleted' mark is set to '{}' for '{}' ", deletedNumber.isPresent(), depositPropertiesPath);
+        String depositPropertiesParent = depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString();
+        Optional<Integer> deletedNumber = depositPropertiesDAO.updateDeleteFlag(depositPropertiesParent, true);
+        log.debug("onDeleteDeposit - 'deleted' mark is set to '{}' for deposit.properties from '{}' ", deletedNumber.isPresent(), depositPropertiesParent);
     }
 
 }

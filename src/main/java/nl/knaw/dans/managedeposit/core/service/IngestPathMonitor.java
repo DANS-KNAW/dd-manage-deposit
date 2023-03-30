@@ -34,35 +34,41 @@ import java.util.List;
 
 public class IngestPathMonitor extends FileAlterationListenerAdaptor implements Managed {
     private static final Logger log = LoggerFactory.getLogger(IngestPathMonitor.class);
-    final long POLLING_INTERVAL = 3 * 1000;
+    private final long POLLING_INTERVAL = 3 * 1000;
     private final List<Path> toMonitorPaths;
+    private final List<FileAlterationMonitor> fileAlterationMonitors;
     private final DepositStatusUpdater depositStatusUpdater;
-    private FileAlterationMonitor monitor;
 
     public IngestPathMonitor(List<Path> depositBoxesPaths, DepositStatusUpdater depositStatusUpdater) {
         this.toMonitorPaths = new ArrayList<>(depositBoxesPaths);
-//        this.monitorPath = Path.of(path);
         this.depositStatusUpdater = depositStatusUpdater;
+        this.fileAlterationMonitors = new ArrayList<>();
     }
 
-    private void startMonitor() throws Exception {
+    private void startMonitors() throws Exception {
         IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(), HiddenFileFilter.VISIBLE);
         IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
         IOFileFilter filter = FileFilterUtils.or(directories, files);
 
-        FileAlterationObserver observer = new FileAlterationObserver(toMonitorPaths.get(0).toFile(), filter);
+        log.info("Starting 'IngestPathMonitor', file filter: deposit.properties");
 
-        observer.addListener(this);
+        for (Path folder : toMonitorPaths) {
+            FileAlterationObserver observer = new FileAlterationObserver(folder.toFile(), filter);
 
-        monitor = new FileAlterationMonitor(this.POLLING_INTERVAL, observer);
-        log.info("Starting IngestPathMonitor, file filter: deposit.properties");
-        monitor.start();
+            observer.addListener(this);
+
+            FileAlterationMonitor monitor = new FileAlterationMonitor(this.POLLING_INTERVAL, observer);
+            fileAlterationMonitors.add(monitor);
+
+            monitor.start();
+            log.debug("'IngestPathMonitor' is going to monitor the folder '{}'", folder);
+        }
     }
 
     @Override
     public void start() throws Exception {
         try {
-            startMonitor();
+            startMonitors();
         }
         catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
@@ -73,7 +79,15 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     @Override
     public void stop() throws Exception {
         log.info("Stopping IngestPathMonitor");
-        monitor.stop();
+
+        fileAlterationMonitors.forEach(monitor -> {
+            try {
+                monitor.stop();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override

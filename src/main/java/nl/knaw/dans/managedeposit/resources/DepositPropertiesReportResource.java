@@ -18,8 +18,6 @@ package nl.knaw.dans.managedeposit.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
@@ -33,7 +31,6 @@ import java.util.Optional;
 
 @Path("/report")
 public class DepositPropertiesReportResource {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesReportResource.class);
     private final DepositPropertiesDAO depositPropertiesDAO;
 
     public DepositPropertiesReportResource(DepositPropertiesDAO depositPropertiesDAO) {
@@ -51,9 +48,8 @@ public class DepositPropertiesReportResource {
     @UnitOfWork
     @Produces("application/json")
     @Path("/{depositId}")
-    public DepositProperties getDepositId(@PathParam("depositId") String depositId) {
-        Optional<String> toFindDeposit = Optional.of(depositId);
-        return depositPropertiesDAO.findById(toFindDeposit.orElse("")).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", toFindDeposit.orElse(""))));
+    public DepositProperties getDepositId(@PathParam("depositId") Optional<String> depositId) {
+        return depositPropertiesDAO.findById(depositId.get()).orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", depositId.orElse(""))));
     }
 
 }

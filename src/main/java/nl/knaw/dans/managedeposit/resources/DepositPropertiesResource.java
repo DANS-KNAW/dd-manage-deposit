@@ -43,8 +43,9 @@ public class DepositPropertiesResource {
         String response = "DD Manage Deposit is running. Usage: \n" +
             "- POST path: basePath/" +
             "- GET path: basePath/report \n" +
-            "- DELETE path: basePath/-delete-deposit \n" +
-            "Parameters: user, state, startdate, enddate";
+            "- DELETE path: basePath/delete-deposit \n" +
+            "Parameters: user, state, startdate, enddate" +
+            "Examples: curl -i -X POST basePath/delete-deposit\\?depositId\\=9999-0001\\&user\\=XXX";
 
         return Response
             .status(Response.Status.OK)

@@ -17,8 +17,6 @@ package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.NotFoundException;
@@ -31,7 +29,6 @@ import javax.ws.rs.core.UriInfo;
 
 @Path("/delete-deposit")
 public class DepositPropertiesDeleteResource {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDeleteResource.class);
     private final DepositPropertiesDAO depositPropertiesDAO;
 
     public DepositPropertiesDeleteResource(DepositPropertiesDAO depositPropertiesDAO) {
