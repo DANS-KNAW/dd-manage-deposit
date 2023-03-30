@@ -19,6 +19,7 @@ import com.codahale.metrics.health.HealthCheck;
 import nl.knaw.dans.managedeposit.DdManageDepositConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -35,9 +36,9 @@ public class InboxHealthCheck extends HealthCheck {
     protected Result check() throws Exception {
         var valid = true;
 
-        for (String folder: configuration.getDepositBoxes()) {
-            var exists = Files.exists(Path.of(folder));
-            var canRead = Files.isReadable(Path.of(folder));
+        for (Path folder : configuration.getDepositBoxes()) {
+            var exists = Files.exists(folder);
+            var canRead = Files.isReadable(folder);
 
             if (exists && canRead) {
                 log.debug("Inbox path '{}' exists and is readable", folder);

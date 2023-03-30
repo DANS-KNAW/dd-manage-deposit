@@ -16,5 +16,5 @@
 package nl.knaw.dans.managedeposit.core;
 
 public enum State {
-    INBOX, FAILED, PROCESSED, REJECTED;
+    INBOX, FAILED, PROCESSED, REJECTED
 }

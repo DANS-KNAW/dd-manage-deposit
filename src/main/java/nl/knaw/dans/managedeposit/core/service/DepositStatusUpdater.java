@@ -18,42 +18,39 @@ package nl.knaw.dans.managedeposit.core.service;
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-public  class DepositStatusUpdater {
+public class DepositStatusUpdater {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesAssembler.class);
     private final DepositPropertiesDAO depositPropertiesDAO;
-    private final SessionFactory hibernateSessionFactory;
     private final DepositPropertiesAssembler depositPropertiesAssembler;
 
-    public DepositStatusUpdater(DepositPropertiesDAO depositPropertiesDAO, SessionFactory sessionFactory) {
+    public DepositStatusUpdater(DepositPropertiesDAO depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
-        this.hibernateSessionFactory = sessionFactory;
         this.depositPropertiesAssembler = new DepositPropertiesAssembler();
     }
 
     @UnitOfWork
     public void onCreateDeposit(Path depositPropertiesPath) {
-        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
-        if ( dpObject.isPresent() ) {
-            depositPropertiesDAO.save(dpObject.get());
-        }
+        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
+        dpObject.ifPresent(depositPropertiesDAO::save);
     }
 
     @UnitOfWork
     public void onChangeDeposit(Path depositPropertiesPath) {
-        Optional<DepositProperties> dpObject= depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
-        if ( dpObject.isPresent() ) {
-            depositPropertiesDAO.save(dpObject.get());
-        }
+        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
+        dpObject.ifPresent(depositPropertiesDAO::save);
     }
 
     @UnitOfWork
     public void onDeleteDeposit(Path depositPropertiesPath) {
         // At this stage, the deposit.properties file's handle is present but the content is null (impossible to read data of the file)
-        depositPropertiesDAO.updateDeleteFlag(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(), true);
+        Optional<Integer> deletedNumber = depositPropertiesDAO.updateDeleteFlag(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(), true);
+        log.debug("onDeleteDeposit - 'deleted' mark is set to '{}' for '{}' ", deletedNumber.isPresent(), depositPropertiesPath);
     }
 
 }

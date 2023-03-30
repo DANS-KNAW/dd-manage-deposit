@@ -58,24 +58,8 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         currentSession().merge(dp);
     }
 
-//    public void updateDeleteFlag(String depositPath, boolean deleted) {
-//        int r = currentSession()
-//            .createQuery("DELETE FROM ExpectedDataset WHERE doi = :doi")
-//            .setParameter("doi", doi)
-//            .executeUpdate();
-//    }
-
     public void delete(DepositProperties dp) {
         currentSession().delete(dp);
-        //        if (Optional.ofNullable(currentSession().find(DepositProperties.class, dp)) != null) {
-        //            currentSession().delete(dp);
-        //            Optional.ofNullable(0);
-        //        }
-        //        return Optional.ofNullable(1);
-    }
-
-    public List<DepositProperties> findAllDefaultQuery() {
-        return list(namedTypedQuery("showAll"));
     }
 
     public List<DepositProperties> findAll() {
@@ -97,16 +81,15 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
     }
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
-        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+        var criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
         Root<DepositProperties> root = deleteQuery.from(DepositProperties.class);
 
         Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
 
         deleteQuery.where(predicate);
-        Query<DepositProperties> query = currentSession().createQuery(deleteQuery);
-        int x = query.executeUpdate();
-        return Optional.of(x);
+        var query = currentSession().createQuery(deleteQuery);
+        return Optional.of(query.executeUpdate());
     }
 
     private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {
@@ -117,28 +100,28 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
             List<String> values = queryParameters.get(key);
             String parameter = key.toLowerCase();
             //javax.persistence.criteria
-            Predicate orPredicate;
-            List<Predicate> orPredicates = new ArrayList<>();
+            Predicate orPredicateItem;
+            List<Predicate> orPredicatesList = new ArrayList<>();
             for (String value : values) {
                 switch (parameter) {
                     case "depositid":
-                        orPredicate = criteriaBuilder.equal(root.get("depositId"), value);
+                        orPredicateItem = criteriaBuilder.equal(root.get("depositId"), value);
                         break;
 
                     case "user":
-                        orPredicate = criteriaBuilder.equal(root.get("userName"), value);
+                        orPredicateItem = criteriaBuilder.equal(root.get("userName"), value);
                         break;
 
                     case "deleted":
                         if (Boolean.parseBoolean(value))
-                            orPredicate = criteriaBuilder.isTrue(root.get("deleted"));
+                            orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
                         else
-                            orPredicate = criteriaBuilder.isFalse(root.get("deleted"));
+                            orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
                         break;
 
                     case "state":
                         State requestedState = State.valueOf(value.toUpperCase());
-                        orPredicate = criteriaBuilder.equal(root.get("state"), requestedState);
+                        orPredicateItem = criteriaBuilder.equal(root.get("state"), requestedState);
                         break;
 
                     case "startdate":
@@ -148,19 +131,20 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                         var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
                         if (parameter.equals("startdate"))
-                            orPredicate = criteriaBuilder.greaterThan(root.get("createdDate"), asked_date);
+                            orPredicateItem = criteriaBuilder.greaterThan(root.get("createdDate"), asked_date);
                         else
-                            orPredicate = criteriaBuilder.lessThan(root.get("createdDate"), asked_date);
+                            orPredicateItem = criteriaBuilder.lessThan(root.get("createdDate"), asked_date);
                         break;
 
                     default:
-                        orPredicate = criteriaBuilder.equal(root.get(key), value);
+                        orPredicateItem = criteriaBuilder.equal(root.get(key), value);
                 }
 
-                orPredicates.add(orPredicate);
+                orPredicatesList.add(orPredicateItem);
             }
-            orPredicate = criteriaBuilder.or(orPredicates.toArray(new Predicate[0]));
-            predicates.add(orPredicate);
+
+            orPredicateItem = criteriaBuilder.or(orPredicatesList.toArray(new Predicate[0]));
+            predicates.add(orPredicateItem);
         }
 
         predicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -173,31 +157,13 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
 
-        Predicate predicate = buildQueryCriteria(Map.of("depositPath",List.of(depositPath)), criteriaBuilder, root);
+        Predicate predicate = buildQueryCriteria(Map.of("depositPath", List.of(depositPath)), criteriaBuilder, root);
         criteriaUpdate.where(predicate);
 
         criteriaUpdate.set("deleted", deleted);
 
-        Query<DepositProperties> query = currentSession().createQuery(criteriaUpdate);
-
-        int x = query.executeUpdate();
-        return Optional.of(x);
-    }
-
-    public Optional<Integer> UpdateSelection(Map<String, List<String>> queryParameters) {
-        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
-        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
-        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
-
-        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
-        criteriaUpdate.where(predicate);
-
-        //        criteriaUpdate.set("", "");
-
-        Query<DepositProperties> query = currentSession().createQuery(criteriaUpdate);
-
-        int x = query.executeUpdate();
-        return Optional.of(x);
+        var query = currentSession().createQuery(criteriaUpdate);
+        return Optional.of(query.executeUpdate());
     }
 
 }

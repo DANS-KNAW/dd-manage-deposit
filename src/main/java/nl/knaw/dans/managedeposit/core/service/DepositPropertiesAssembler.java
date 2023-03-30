@@ -19,33 +19,37 @@ import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.State;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
 class DepositPropertiesAssembler {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesAssembler.class);
+
     DepositPropertiesAssembler() {
-     }
+    }
 
-     Optional<DepositProperties> assembleObject(Path depositPropertiesPath, boolean deleted) {
-         System.out.println("assembleObject: " + (depositPropertiesPath.getNameCount() - 3));
-         DepositProperties dp; // = null
-         Configuration configuration;
-         try {
-             configuration = ReadDepositProperties.readDepositProperties(depositPropertiesPath);
-             dp = new DepositProperties(configuration.getString("depositId"),
-                 configuration.getString("userName"),
-                 //State.valueOf(configuration.getString("state").toUpperCase()),
-                 State.INBOX,
-                 depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toString(),
-                 depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
-                 deleted);
+    Optional<DepositProperties> assembleObject(Path depositPropertiesPath, boolean deleted) {
+        log.debug("assembleObject: '{}'", depositPropertiesPath.getNameCount() - 3);
+        DepositProperties dp; // = null
+        Configuration configuration;
+        try {
+            configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesPath);
+            dp = new DepositProperties(configuration.getString("depositId"),
+                configuration.getString("userName"),
+                //State.valueOf(configuration.getString("state").toUpperCase()),
+                State.INBOX,
+                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toString(),
+                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
+                deleted);
+        }
+        catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+        return Optional.of(dp);
+    }
 
-         }
-         catch (ConfigurationException e) {
-             throw new RuntimeException(e);
-         }
-         return Optional.of(dp);
-     }
-
-     }
+}

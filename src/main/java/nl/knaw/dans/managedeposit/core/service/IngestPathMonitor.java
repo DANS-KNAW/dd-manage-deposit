@@ -29,32 +29,33 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IngestPathMonitor extends FileAlterationListenerAdaptor implements Managed {
-    final long POLLING_INTERVAL = 3 * 1000;
-
     private static final Logger log = LoggerFactory.getLogger(IngestPathMonitor.class);
-    private final Path monitorPath;
-    private FileAlterationMonitor monitor;
+    final long POLLING_INTERVAL = 3 * 1000;
+    private final List<Path> toMonitorPaths;
     private final DepositStatusUpdater depositStatusUpdater;
+    private FileAlterationMonitor monitor;
 
-    public IngestPathMonitor(String path, DepositStatusUpdater depositStatusUpdater) {
-        this.monitorPath = Path.of(path);
+    public IngestPathMonitor(List<Path> depositBoxesPaths, DepositStatusUpdater depositStatusUpdater) {
+        this.toMonitorPaths = new ArrayList<>(depositBoxesPaths);
+//        this.monitorPath = Path.of(path);
         this.depositStatusUpdater = depositStatusUpdater;
     }
 
     private void startMonitor() throws Exception {
         IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(), HiddenFileFilter.VISIBLE);
-        IOFileFilter files       = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
-        IOFileFilter filter      = FileFilterUtils.or(directories, files);
+        IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
+        IOFileFilter filter = FileFilterUtils.or(directories, files);
 
-        FileAlterationObserver observer = new FileAlterationObserver(monitorPath.toFile(), filter);
+        FileAlterationObserver observer = new FileAlterationObserver(toMonitorPaths.get(0).toFile(), filter);
 
         observer.addListener(this);
 
         monitor = new FileAlterationMonitor(this.POLLING_INTERVAL, observer);
-        log.info("Starting file alteration monitor for path '{}', file filter: deposit.properties", this.monitorPath);
+        log.info("Starting IngestPathMonitor, file filter: deposit.properties");
         monitor.start();
     }
 
@@ -71,46 +72,26 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
     @Override
     public void stop() throws Exception {
+        log.info("Stopping IngestPathMonitor");
         monitor.stop();
     }
 
     @Override
     public void onFileCreate(File file) {
-//        log.debug("onFileCreate: '{}'",file.getPath());
-        System.out.format("[%s] onFileCreate:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", LocalTime.now(), file.getName(), this.monitorPath, file.getParent(), file.toPath());
+        log.debug("onFileCreate: '{}'", file.getName());
         depositStatusUpdater.onCreateDeposit(file.toPath());
     }
 
     @Override
-    public void onFileDelete (File file) {
-//        log.debug("onFileDelete: '{}'",file.getPath);
-        System.out.format("[%s] onFileDelete:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", LocalTime.now(), file.getName(), this.monitorPath, file.getParent(), file.toPath());
+    public void onFileDelete(File file) {
+        log.debug("onFileDelete: '{}'", file.getName());
         depositStatusUpdater.onDeleteDeposit(file.toPath());
     }
 
     @Override
     public void onFileChange(File file) {
-//        log.debug("onFileChange: '{}'",file.toPath());
-        System.out.format("[%s]  onFileChange:  file.getName(): %s - monitorPath %s, file.getParent(): %s - file.toPath(): %s\n", LocalTime.now(), file.getName(), this.monitorPath, file.getParent(), file.toPath());
+        log.debug("onFileChange: '{}'", file.getName());
         depositStatusUpdater.onChangeDeposit(file.toPath());
-    }
-
-    @Override
-    public void onDirectoryChange(File dir) {
-//        log.debug("onDirectoryChange: '{}'",dir.toPath());
-        System.out.format("onDirectoryChange:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
-    }
-//
-//    @Override
-//    public void onDirectoryCreate (File dir) {
-//        log.debug("onDirectoryCreate: '{}'",dir.toPath());
-//        System.out.format("onDirectoryCreate:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
-//    }
-//
-    @Override
-    public void onDirectoryDelete(File dir) {
-//        log.debug("onDirectoryDelete: '{}'",dir.toPath());
-        System.out.format("onDirectoryDelete:  dir.getName(): %s - monitorPath %s - dir.getParent(): %s - dir.toPath(): %s\n", dir.getName(), this.monitorPath, dir.getParent(), dir.toPath());
     }
 
 }

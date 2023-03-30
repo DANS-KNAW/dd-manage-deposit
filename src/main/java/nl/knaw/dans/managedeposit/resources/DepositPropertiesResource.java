@@ -18,41 +18,33 @@ package nl.knaw.dans.managedeposit.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
-import org.hibernate.SessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.List;
 
 @Path("/")
 public class DepositPropertiesResource {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesResource.class);
     private final DepositPropertiesDAO depositPropertiesDAO;
+
     public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
     }
 
     @GET
     @UnitOfWork
-    @Produces("text/plain" )
+    @Produces("text/plain")
     public Response getApiInformation() {
-            String response =  "DD Manage Deposit is running. Usage: \n" +
-                "- POST path: basePath/" +
-                "- GET path: basePath/report \n" +
-                "- DELETE path: basePath/-delete-deposit \n" +
-                "Parameters: user, state, startdate, enddate";
+        String response = "DD Manage Deposit is running. Usage: \n" +
+            "- POST path: basePath/" +
+            "- GET path: basePath/report \n" +
+            "- DELETE path: basePath/-delete-deposit \n" +
+            "Parameters: user, state, startdate, enddate";
 
         return Response
             .status(Response.Status.OK)
@@ -68,13 +60,4 @@ public class DepositPropertiesResource {
     public DepositProperties createDepositPropertiesRecord(@Valid DepositProperties depositProperties) {
         return depositPropertiesDAO.create(depositProperties);
     }
-
-    @PUT
-    @UnitOfWork
-    @Produces({ "application/json", "text/csv" })
-    public String updateDeposit(@Context UriInfo uriInfo) {
-        int updatedNumber = depositPropertiesDAO.UpdateSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException(String.format("Not such deposit with given criteria")));
-        return String.format("Updated record(s): %d.", updatedNumber);
-    }
-
 }

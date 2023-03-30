@@ -16,14 +16,11 @@
 package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -41,34 +38,13 @@ public class DepositPropertiesDeleteResource {
         this.depositPropertiesDAO = depositPropertiesDAO;
     }
 
-    @DELETE
-    @UnitOfWork
-    @Produces("text/plain")
-    public String DeleteDepositPropertiesSelection(@Context UriInfo uriInfo) {
-        int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException("Not such deposit with given criteria"));
-        return String.format("Deleted record(s): %d.", deletedNumber);
-    }
-
     @POST
     @UnitOfWork
     @Produces("text/plain")
     @Consumes(MediaType.TEXT_PLAIN)
-    public String DeleteDepositPropertiesUsingParams(@Context UriInfo uriInfo){
+    public String deleteDepositPropertiesUsingParams(@Context UriInfo uriInfo) {
         int deletedNumber = depositPropertiesDAO.deleteSelection(uriInfo.getQueryParameters()).orElseThrow(() -> new NotFoundException("Not such deposit with given criteria"));
-        return String.format("Deleted record(s): %d.", deletedNumber);
-    }
-
-    @POST
-    @UnitOfWork
-    @Produces("text/plain")
-    @Consumes("application/json")
-    public void DeleteDepositPropertiesUsingJsonObject(@Valid DepositProperties depositProperties) {
-        depositPropertiesDAO.delete(depositProperties);
-//
-//        Response.Status status;
-//        System.out.println(Response.serverError().build().getStatusInfo().getReasonPhrase().toString());
-//        int deletedNumber = depositPropertiesDAO.delete(depositProperties).orElseThrow(() -> new NotFoundException(String.format("Not such deposit with given criteria")));
-//        return String.format("Deleted record(s): %d.", deletedNumber);
+        return String.format("Deleted number(s): %d.", deletedNumber);
     }
 
 }

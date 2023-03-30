@@ -31,7 +31,6 @@ import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesDeleteResource;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesReportResource;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
-import org.hibernate.SessionFactory;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
@@ -41,9 +40,10 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
     private final HibernateBundle<DdManageDepositConfiguration> depositPropertiesHibernate =
         new HibernateBundle<>(DepositProperties.class) {
+
             @Override
             public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
-                return  configuration.getDepositPropertiesDatabase();
+                return configuration.getDepositPropertiesDatabase();
             }
         };
 
@@ -71,10 +71,10 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
         final UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
         DepositStatusUpdater depositStatusUpdater = proxyFactory.create(
             DepositStatusUpdater.class,
-            new Class[] {DepositPropertiesDAO.class, SessionFactory.class},
-            new Object[] {depositPropertiesDAO, depositPropertiesHibernate.getSessionFactory()});
+            new Class[] { DepositPropertiesDAO.class },
+            new Object[] { depositPropertiesDAO });
 
-        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor("data/auto-ingest", depositStatusUpdater);
+        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor(configuration.getDepositBoxes(), depositStatusUpdater);
         environment.lifecycle().manage(ingestPathMonitor);
 
     }

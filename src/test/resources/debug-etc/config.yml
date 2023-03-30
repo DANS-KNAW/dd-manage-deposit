@@ -11,12 +11,12 @@
       - type: http
         port: 20348
 
-  # depositBoxes:
-  #   - data/auto-ingest/inbox
-  #   - data/auto-ingest/outbox/processed
-  #   - data/auto-ingest/outbox/rejected
-  #   - data/auto-ingest/outbox/failed
-  #   - data/sword2-uploads
+    depositBoxes:
+      - data/auto-ingest/inbox
+      - data/auto-ingest/outbox/processed
+      - data/auto-ingest/outbox/rejected
+      - data/auto-ingest/outbox/failed
+      - data/sword2-uploads
 
   depositPropertiesDatabase:
     driverClass: org.hsqldb.jdbcDriver

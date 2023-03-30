@@ -30,7 +30,6 @@ import java.time.OffsetDateTime;
     name = "showAll",
     query = "SELECT dp FROM DepositProperties dp"
 )
-//@JsonPropertyOrder({"depositId", "User Name", "deleted", "Created Date"})
 public class DepositProperties {
     @Id
     @Column(name = "deposit_id", nullable = false)
@@ -45,7 +44,7 @@ public class DepositProperties {
     @Column(name = "deleted")
     private boolean deleted;
 
-    @Column (name = "state")
+    @Column(name = "state")
     @Enumerated(EnumType.STRING)
     private State state;
 
@@ -58,7 +57,9 @@ public class DepositProperties {
     public String getDepositId() {
         return depositId;
     }
-    public DepositProperties() {}
+
+    public DepositProperties() {
+    }
 
     public DepositProperties(String depositId, String userName, State state, String statusPath, String depositPath, boolean isDeleted) {
         this.depositId = depositId;
@@ -71,6 +72,7 @@ public class DepositProperties {
         // get the current UTC timestamp or creation.timestamp from
         this.createdDate = OffsetDateTime.now();
     }
+
     public void setDepositId(String depositId) {
         this.depositId = depositId;
     }
@@ -102,6 +104,7 @@ public class DepositProperties {
     public void setState(State state) {
         this.state = state;
     }
+
     public void setState(String state) {
         this.state = State.valueOf(state.toUpperCase());
     }

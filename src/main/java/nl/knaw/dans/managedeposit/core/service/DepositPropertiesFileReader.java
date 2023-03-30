@@ -15,26 +15,27 @@
  */
 package nl.knaw.dans.managedeposit.core.service;
 
-import java.nio.file.Path;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class ReadDepositProperties {
+import java.nio.file.Path;
+
+class DepositPropertiesFileReader {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesAssembler.class);
 
     static public Configuration readDepositProperties(Path propertiesFile) throws ConfigurationException {
+        log.debug("readDepositProperties: '{}'", propertiesFile);
         Parameters params = new Parameters();
         var paramConfig = params.properties().setFileName(propertiesFile.toString());
 
         FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>
             (PropertiesConfiguration.class, null, true)
             .configure(paramConfig);
-
-        Configuration configuration = builder.getConfiguration();
-
-        System.out.format("userName: %s\n", configuration.getString("userName"));
 
         return builder.getConfiguration();
     }
