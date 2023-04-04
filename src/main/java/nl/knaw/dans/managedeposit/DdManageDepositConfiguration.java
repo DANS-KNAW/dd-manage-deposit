@@ -16,11 +16,35 @@
 
 package nl.knaw.dans.managedeposit;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.dropwizard.db.DataSourceFactory;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DdManageDepositConfiguration extends Configuration {
+    @Valid
+    @NotNull
+    private DataSourceFactory database = new DataSourceFactory();
 
+    private List<Path> depositBoxes = new ArrayList<>();
+
+    public List<Path> getDepositBoxes() {
+        return depositBoxes;
+    }
+
+    public void setDepositBoxes(List<Path> depositBoxes) {
+        this.depositBoxes = depositBoxes;
+    }
+
+    public DataSourceFactory getDepositPropertiesDatabase() {
+        return database;
+    }
+
+    public void setDepositPropertiesDatabase(DataSourceFactory database) {
+        this.database = database;
+    }
 }
