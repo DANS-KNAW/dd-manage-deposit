@@ -17,7 +17,6 @@ package nl.knaw.dans.managedeposit.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.core.State;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("resource")
 public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public DepositPropertiesDAO(SessionFactory sessionFactory) {
@@ -119,11 +119,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                             orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
                         break;
 
-                    case "state":
-                        State requestedState = State.valueOf(value.toUpperCase());
-                        orPredicateItem = criteriaBuilder.equal(root.get("state"), requestedState);
-                        break;
-
                     case "startdate":
                     case "enddate":
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -131,9 +126,9 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                         var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
                         if (parameter.equals("startdate"))
-                            orPredicateItem = criteriaBuilder.greaterThan(root.get("createdDate"), asked_date);
+                            orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
                         else
-                            orPredicateItem = criteriaBuilder.lessThan(root.get("createdDate"), asked_date);
+                            orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
                         break;
 
                     default:
@@ -152,12 +147,12 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return predicate;
     }
 
-    public Optional<Integer> updateDeleteFlag(String depositPath, boolean deleted) {
+    public Optional<Integer> updateDeleteFlag(String depositId, boolean deleted) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
 
-        Predicate predicate = buildQueryCriteria(Map.of("depositPath", List.of(depositPath)), criteriaBuilder, root);
+        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
         criteriaUpdate.where(predicate);
 
         criteriaUpdate.set("deleted", deleted);
@@ -165,5 +160,19 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         var query = currentSession().createQuery(criteriaUpdate);
         return Optional.of(query.executeUpdate());
     }
+
+//    public Optional<Integer> updateModificationDateTime(String depositId, OffsetDateTime dateTime) {
+//        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+//        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
+//        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
+//
+//        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
+//        criteriaUpdate.where(predicate);
+//
+//        criteriaUpdate.set("depositUpdateTimestamp", dateTime);
+//
+//        var query = currentSession().createQuery(criteriaUpdate);
+//        return Optional.of(query.executeUpdate());
+//    }
 
 }

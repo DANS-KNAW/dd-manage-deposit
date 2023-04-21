@@ -42,7 +42,7 @@ public class DepositStatusUpdater {
 
     @UnitOfWork
     public void onChangeDeposit(Path depositPropertiesPath) {
-        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
+        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesPath, true);
         dpObject.ifPresent(depositPropertiesDAO::save);
     }
 
