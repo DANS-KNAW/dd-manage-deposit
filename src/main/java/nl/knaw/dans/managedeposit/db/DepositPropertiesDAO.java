@@ -26,6 +26,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -161,18 +162,18 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return Optional.of(query.executeUpdate());
     }
 
-//    public Optional<Integer> updateModificationDateTime(String depositId, OffsetDateTime dateTime) {
-//        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
-//        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
-//        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
-//
-//        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
-//        criteriaUpdate.where(predicate);
-//
-//        criteriaUpdate.set("depositUpdateTimestamp", dateTime);
-//
-//        var query = currentSession().createQuery(criteriaUpdate);
-//        return Optional.of(query.executeUpdate());
-//    }
+    public Optional<Integer> updatePathModification(String depositId, Path currentParentPath) {
+        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
+        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
+        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
+
+        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
+        criteriaUpdate.where(predicate);
+
+        criteriaUpdate.set("location", currentParentPath.toString());
+
+        var query = currentSession().createQuery(criteriaUpdate);
+        return Optional.of(query.executeUpdate());
+    }
 
 }

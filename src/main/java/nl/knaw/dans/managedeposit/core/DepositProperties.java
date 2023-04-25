@@ -42,7 +42,7 @@ public class DepositProperties {
     @Column(name = "deposit_state")                          // state.label
     private String depositState;
 
-    @Column(name = "location")                               // full path on disk
+    @Column(name = "location")                               // full parent-path on disk
     private String location;
 
     @Column(name = "deposit_creation_timestamp")             // creation.timestamp
@@ -57,7 +57,7 @@ public class DepositProperties {
     @Column(name = "storage_in_bytes")                       // Total storage of deposit directory
     private long storageInBytes;
 
-    @Column(name = "deleted")                                // deposit is deleted - archived
+    @Column(name = "deleted")                                // deposit is deleted from inbox - archived
     private boolean deleted;
     public String getDepositId() {
         return depositId;
@@ -77,30 +77,6 @@ public class DepositProperties {
         this.location = location;
         this.storageInBytes = storageInBytes;
     }
-
-    public DepositProperties(String depositId, String depositor, String bagName, String depositState,
-        String description, OffsetDateTime depositCreationTimestamp, String location) {
-        this.depositId = depositId;
-        this.depositor = depositor;
-        this.bagName = bagName;
-        this.depositState = depositState;
-        this.description = description;
-        this.depositCreationTimestamp = depositCreationTimestamp;
-        this.location = location;
-    }
-
-//    public DepositProperties(String depositId, String userName, State state, String statusPath, String depositPath, boolean isDeleted) {
-//        this.depositId = depositId;
-//        this.userName = userName;
-//        this.deleted = isDeleted;
-//        this.state = state;
-//        this.statusPath = statusPath;
-//        this.depositPath = depositPath;
-//
-//        // get the current UTC timestamp or creation.timestamp from
-//        this.createdDate = OffsetDateTime.now();
-//    }
-
 
     public String getDepositor() {
         return depositor;
@@ -156,6 +132,14 @@ public class DepositProperties {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public boolean setDeleted(boolean deleted) {
+        return this.deleted = deleted;
     }
 
     public long getStorageInBytes() {

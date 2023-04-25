@@ -34,13 +34,11 @@ class DepositPropertiesAssembler {
     }
 
     Optional<DepositProperties> assembleObject(Path depositPropertiesPath, boolean  updateModificationDateTime) {
-        log.debug("assembleObject: '{}'", depositPropertiesPath.getNameCount() - 3);
+        log.debug("assembleObject(depositPropertiesPath:Path): '{}'", depositPropertiesPath.getNameCount() - 3);
         DepositProperties dp; // = null
         Configuration configuration;
         try {
             configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesPath);
-//            configuration = readDepositProperties(Path.of("/Users/alisheikhi/git/service/data-station/dd-manage-deposit/data/auto-ingest/inbox/2d56d760-0d6c-4ab1-993b-76b9ddb5c69e/test.txt"));
-//            configuration = readDepositProperties(depositPropertiesPath);
 
             dp = new DepositProperties(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
                 configuration.getString("depositor.userId", ""),
@@ -48,20 +46,9 @@ class DepositPropertiesAssembler {
                 configuration.getString("state.label", ""),
                 configuration.getString("state.description", ""),
                 OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
-                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toString());
+                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toAbsolutePath().toString(),
+                calculateFolderSize(depositPropertiesPath.getParent()));
 
-//            dp = new DepositProperties(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
-//                "PANVU",
-//                "67631",
-//                "SUBMITTED",
-//                "Ready to re-ingest",
-//                OffsetDateTime.now(),
-//                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toString());
-
-
-
-            long size = calculateFolderSize(depositPropertiesPath.getParent().resolve(dp.getBagName()));
-            dp.setStorageInBytes(size);
             if (updateModificationDateTime) {
                 dp.setDepositUpdateTimestamp(OffsetDateTime.now());
             }

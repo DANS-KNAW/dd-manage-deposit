@@ -92,19 +92,19 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
     @Override
     public void onFileCreate(File file) {
-        log.debug("onFileCreate: '{}'", file.getName());
+        log.debug("onFileCreate: '{}'", file.getPath());
         depositStatusUpdater.onCreateDeposit(file.toPath());
     }
 
     @Override
     public void onFileDelete(File file) {
-        log.debug("onFileDelete: '{}'", file.getName());
+        log.debug("onFileDelete: '{}'", file.getPath());
         depositStatusUpdater.onDeleteDeposit(file.toPath());
     }
 
     @Override
     public void onFileChange(File file) {
-        log.debug("onFileChange: '{}'", file.getName());
+        log.debug("onFileChange: '{}'", file.getPath());
         depositStatusUpdater.onChangeDeposit(file.toPath());
     }
 
