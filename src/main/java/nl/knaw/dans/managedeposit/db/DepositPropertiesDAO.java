@@ -110,7 +110,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                         break;
 
                     case "user":
-                        orPredicateItem = criteriaBuilder.equal(root.get("userName"), value);
+                        orPredicateItem = criteriaBuilder.equal(root.get("depositor"), value);
                         break;
 
                     case "deleted":
@@ -162,7 +162,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         return Optional.of(query.executeUpdate());
     }
 
-    public Optional<Integer> updatePathModification(String depositId, Path currentParentPath) {
+    public Optional<Integer> updateDepositLocation(String depositId, Path currentParentPath) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);

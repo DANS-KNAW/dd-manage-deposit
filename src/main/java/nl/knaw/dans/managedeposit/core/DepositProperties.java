@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.managedeposit.core;
 
+import nl.knaw.dans.managedeposit.core.service.Limiter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -30,34 +32,34 @@ import java.time.OffsetDateTime;
 )
 public class DepositProperties {
     @Id
-    @Column(name = "deposit_id", nullable = false)           // deposit directory name
+    @Column(name = "deposit_id", nullable = false)                         // deposit directory name
     private String depositId;
 
-    @Column(name = "depositor", nullable = false)            // depositor.userId
+    @Column(name = "depositor", nullable = false)                          // depositor.userId
     private String depositor;
 
-    @Column(name = "bag_name", nullable = false)             // Bag directory name
+    @Column(name = "bag_name", nullable = false)                           // Bag directory name
     private String bagName;
 
-    @Column(name = "deposit_state")                          // state.label
+    @Column(name = "deposit_state")                                        // state.label
     private String depositState;
 
-    @Column(name = "location")                               // full parent-path on disk
+    @Column(name = "location", length = Limiter.maxDirectoryLength)        // full parent-path on disk
     private String location;
 
-    @Column(name = "deposit_creation_timestamp")             // creation.timestamp
+    @Column(name = "deposit_creation_timestamp")                           // creation.timestamp
     private OffsetDateTime depositCreationTimestamp;
 
-    @Column(name = "deposit_update_timestamp")               // modified timestamp of deposit.properties
+    @Column(name = "deposit_update_timestamp")                             // modified timestamp of deposit.properties
     private OffsetDateTime depositUpdateTimestamp;
 
-    @Column(name = "description")                            // state.description
+    @Column(name = "description", length = Limiter.maxDescriptionLength)   // state.description
     private String description;
 
-    @Column(name = "storage_in_bytes")                       // Total storage of deposit directory
+    @Column(name = "storage_in_bytes")                                     // Total storage of deposit directory
     private long storageInBytes;
 
-    @Column(name = "deleted")                                // deposit is deleted from inbox - archived
+    @Column(name = "deleted")                                              // deposit is deleted from inbox - archived
     private boolean deleted;
     public String getDepositId() {
         return depositId;

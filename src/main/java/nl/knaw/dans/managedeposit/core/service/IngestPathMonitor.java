@@ -34,15 +34,16 @@ import java.util.List;
 
 public class IngestPathMonitor extends FileAlterationListenerAdaptor implements Managed {
     private static final Logger log = LoggerFactory.getLogger(IngestPathMonitor.class);
-    private final long POLLING_INTERVAL = 3 * 1000;
+    private final long pollingInterval;
     private final List<Path> toMonitorPaths;
     private final List<FileAlterationMonitor> fileAlterationMonitors;
     private final DepositStatusUpdater depositStatusUpdater;
 
-    public IngestPathMonitor(List<Path> depositBoxesPaths, DepositStatusUpdater depositStatusUpdater) {
+    public IngestPathMonitor(List<Path> depositBoxesPaths, DepositStatusUpdater depositStatusUpdater, long pollingInterval) {
         this.toMonitorPaths = new ArrayList<>(depositBoxesPaths);
         this.depositStatusUpdater = depositStatusUpdater;
         this.fileAlterationMonitors = new ArrayList<>();
+        this.pollingInterval = pollingInterval;
     }
 
     private void startMonitors() throws Exception {
@@ -57,7 +58,7 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
             observer.addListener(this);
 
-            FileAlterationMonitor monitor = new FileAlterationMonitor(this.POLLING_INTERVAL, observer);
+            FileAlterationMonitor monitor = new FileAlterationMonitor(this.pollingInterval, observer);
             fileAlterationMonitors.add(monitor);
 
             monitor.start();
@@ -92,20 +93,20 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
     @Override
     public void onFileCreate(File file) {
-        log.debug("onFileCreate: '{}'", file.getPath());
-        depositStatusUpdater.onCreateDeposit(file.toPath());
+        log.debug("onFileCreate: '{}'", file.getAbsolutePath());
+        depositStatusUpdater.onCreateDeposit(file);
     }
 
     @Override
     public void onFileDelete(File file) {
-        log.debug("onFileDelete: '{}'", file.getPath());
-        depositStatusUpdater.onDeleteDeposit(file.toPath());
+        log.debug("onFileDelete: '{}'", file.getAbsolutePath());
+        depositStatusUpdater.onDeleteDeposit(file);
     }
 
     @Override
     public void onFileChange(File file) {
-        log.debug("onFileChange: '{}'", file.getPath());
-        depositStatusUpdater.onChangeDeposit(file.toPath());
+        log.debug("onFileChange: '{}'", file.getAbsolutePath());
+        depositStatusUpdater.onChangeDeposit(file);
     }
 
 }

@@ -21,6 +21,7 @@ import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,46 +38,46 @@ public class DepositStatusUpdater {
     }
 
     @UnitOfWork
-    public void onCreateDeposit(Path depositPropertiesPath) {
-        Optional<DepositProperties> dp = depositPropertiesDAO.findById(depositPropertiesPath.getParent().getFileName().toString());
+    public void onCreateDeposit(File depositPropertiesFile) {
+        Optional<DepositProperties> dp = depositPropertiesDAO.findById(depositPropertiesFile.getParentFile().getName());
 
         if (dp.isPresent()) {
             // The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Update the location column.
-            Path currentFolder = depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3);
-            Optional<Integer> updatedNumber = depositPropertiesDAO.updatePathModification(dp.get().getDepositId(), currentFolder.toAbsolutePath());
+//            Path currentFolder = depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3);
+            Path depositLocationFolder = Path.of(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath());
+            Optional<Integer> updatedNumber = depositPropertiesDAO.updateDepositLocation(dp.get().getDepositId(), depositLocationFolder);
             if (updatedNumber.isPresent())
-                log.debug("onCreateDeposit - `location` of deposit '{}' has been updated to '{}' ", dp.get().getDepositId(), currentFolder);
+                log.debug("onCreateDeposit - `location` of deposit '{}' has been updated to '{}' ", dp.get().getDepositId(), depositLocationFolder);
         }
         else {
-            Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesPath, false);
+            Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, false);
             dpObject.ifPresent(depositPropertiesDAO::save);
-            log.debug("onCreateDeposit: A new deposit has been registered `{}`", depositPropertiesPath.getParent());
+            log.debug("onCreateDeposit: A new deposit has been registered `{}`", depositPropertiesFile.getParentFile().getAbsolutePath());
         }
     }
 
     @UnitOfWork
-    public void onChangeDeposit(Path depositPropertiesPath) {
-        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesPath, true);
+    public void onChangeDeposit(File depositPropertiesFile) {
+        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, true);
         dpObject.ifPresent(depositPropertiesDAO::save);
-        log.debug("onChangeDeposit: deposit.properties has been changed `{}`", depositPropertiesPath);
+        log.debug("onChangeDeposit: deposit.properties has been changed `{}`", depositPropertiesFile.getParentFile().getAbsolutePath());
     }
 
     @UnitOfWork
-    public void onDeleteDeposit(Path depositPropertiesPath) {
+    public void onDeleteDeposit(File depositPropertiesFile) {
         // At this stage, the deposit.properties file's handle is present but the content is null (impossible to read data of the file)
-
-        Optional<DepositProperties> dp = depositPropertiesDAO.findById(depositPropertiesPath.getParent().getFileName().toString());
+        Optional<DepositProperties> dp = depositPropertiesDAO.findById(depositPropertiesFile.getParentFile().getName());
 
         try {
             // The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Ignore delete step
-            if (dp.isPresent() && Files.isSameFile(Path.of(dp.get().getLocation()),depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toAbsolutePath())) {
-                String depositPropertiesParent = depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString();
-                Optional<Integer> deletedNumber = depositPropertiesDAO.updateDeleteFlag(depositPropertiesParent, true);
-                log.debug("onDeleteDeposit - 'deleted' mark has been set to '{}' for deposit.properties from '{}' ", deletedNumber.isPresent(), depositPropertiesParent);
+            if (dp.isPresent() && Files.isSameFile(Path.of(dp.get().getLocation()), Path.of(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath()))) {
+                String depositId = depositPropertiesFile.getParentFile().getName();
+                Optional<Integer> deletedNumber = depositPropertiesDAO.updateDeleteFlag(depositId, true);
+                log.debug("onDeleteDeposit - 'deleted' mark has been set to '{}' for deposit.properties from '{}' ", deletedNumber.isPresent(), depositId);
             }
         }
         catch (IOException e) {
-            log.debug("The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Ignore delete step for {}", depositPropertiesPath);
+            log.debug("The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Ignore delete step for {}", depositPropertiesFile.getParentFile().getAbsolutePath());
         }
     }
 

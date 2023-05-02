@@ -21,6 +21,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,25 +34,31 @@ class DepositPropertiesAssembler {
     DepositPropertiesAssembler() {
     }
 
-    Optional<DepositProperties> assembleObject(Path depositPropertiesPath, boolean  updateModificationDateTime) {
-        log.debug("assembleObject(depositPropertiesPath:Path): '{}'", depositPropertiesPath.getNameCount() - 3);
+    Optional<DepositProperties> assembleObject(File depositPropertiesFile, boolean  updateModificationDateTime) {
+
+        Path depositPath = depositPropertiesFile.getParentFile().toPath();
+        log.debug("assembleObject(depositPropertiesPath:Path): '{}'", depositPropertiesFile.getAbsolutePath());
         DepositProperties dp; // = null
         Configuration configuration;
         try {
-            configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesPath);
+            configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesFile);
 
-            dp = new DepositProperties(depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
+            dp = new DepositProperties(depositPath.getFileName().toString(),
                 configuration.getString("depositor.userId", ""),
                 configuration.getString("bag-store.bag-name", ""),
                 configuration.getString("state.label", ""),
-                configuration.getString("state.description", ""),
+                Limiter.stripEnd(configuration.getString("state.description", ""), Limiter.maxDescriptionLength),
                 OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
-                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toAbsolutePath().toString(),
-                calculateFolderSize(depositPropertiesPath.getParent()));
+                Limiter.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), Limiter.maxDirectoryLength),
+                calculateFolderSize(depositPath.getParent()));
 
             if (updateModificationDateTime) {
                 dp.setDepositUpdateTimestamp(OffsetDateTime.now());
             }
+            else {
+                dp.setDepositUpdateTimestamp(dp.getDepositCreationTimestamp());
+            }
+
         }
         catch (ConfigurationException e) {
             log.error(e.getMessage(), e);

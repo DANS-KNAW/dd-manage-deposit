@@ -23,15 +23,15 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
+import java.io.File;
 
 class DepositPropertiesFileReader {
     private static final Logger log = LoggerFactory.getLogger(DepositPropertiesAssembler.class);
 
-    static public Configuration readDepositProperties(Path propertiesFile) throws ConfigurationException {
-        log.debug("readDepositProperties: '{}'", propertiesFile);
+    static public Configuration readDepositProperties(File propertiesFile) throws ConfigurationException {
+        log.debug("readDepositProperties: '{}'", propertiesFile.toString());
         Parameters params = new Parameters();
-        var paramConfig = params.properties().setFileName(propertiesFile.toString());
+        var paramConfig = params.properties().setFileName(propertiesFile.getAbsolutePath());
 
         FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>
             (PropertiesConfiguration.class, null, true)

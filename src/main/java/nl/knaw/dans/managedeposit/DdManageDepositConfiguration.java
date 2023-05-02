@@ -18,6 +18,7 @@ package nl.knaw.dans.managedeposit;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import nl.knaw.dans.managedeposit.core.service.Limiter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -29,6 +30,8 @@ public class DdManageDepositConfiguration extends Configuration {
     @Valid
     @NotNull
     private DataSourceFactory database = new DataSourceFactory();
+
+    private long pollingInterval;
 
     private List<Path> depositBoxes = new ArrayList<>();
 
@@ -46,5 +49,13 @@ public class DdManageDepositConfiguration extends Configuration {
 
     public void setDepositPropertiesDatabase(DataSourceFactory database) {
         this.database = database;
+    }
+
+    public long getPollingInterval() {
+        return pollingInterval > 0 ? pollingInterval : Limiter.pollingInterval;
+    }
+
+    public void setPollingInterval(long pollingInterval) {
+        this.pollingInterval = pollingInterval;
     }
 }
