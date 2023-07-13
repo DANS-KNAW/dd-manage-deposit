@@ -83,6 +83,9 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
         var criteriaBuilder = currentSession().getCriteriaBuilder();
+        if (queryParameters.size() == 0)                   // Note: all records will be deleted (accidentally) without any specified query parameter
+            return Optional.of(0);
+
         CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
         Root<DepositProperties> root = deleteQuery.from(DepositProperties.class);
 
@@ -118,6 +121,10 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                             orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
                         else
                             orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
+                        break;
+
+                    case "state":
+                        orPredicateItem = criteriaBuilder.equal(root.get("depositState"), value);
                         break;
 
                     case "startdate":

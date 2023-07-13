@@ -31,21 +31,17 @@ import java.time.OffsetDateTime;
     query = "SELECT dp FROM DepositProperties dp"
 )
 public class DepositProperties {
-    @Id
-    @Column(name = "deposit_id", nullable = false)                         // deposit directory name
-    private String depositId;
 
     @Column(name = "depositor", nullable = false)                          // depositor.userId
     private String depositor;
-
+    @Id
+    @Column(name = "deposit_id", nullable = false)                         // deposit directory name
+    private String depositId;
     @Column(name = "bag_name", nullable = false)                           // Bag directory name
     private String bagName;
 
     @Column(name = "deposit_state")                                        // state.label
     private String depositState;
-
-    @Column(name = "location", length = Limiter.maxDirectoryLength)        // full parent-path on disk
-    private String location;
 
     @Column(name = "deposit_creation_timestamp")                           // creation.timestamp
     private OffsetDateTime depositCreationTimestamp;
@@ -55,6 +51,9 @@ public class DepositProperties {
 
     @Column(name = "description", length = Limiter.maxDescriptionLength)   // state.description
     private String description;
+
+    @Column(name = "location", length = Limiter.maxDirectoryLength)        // full parent-path on disk
+    private String location;
 
     @Column(name = "storage_in_bytes")                                     // Total storage of deposit directory
     private long storageInBytes;

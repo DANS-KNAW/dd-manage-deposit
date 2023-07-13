@@ -50,7 +50,7 @@ class DepositPropertiesAssembler {
                 Limiter.stripEnd(configuration.getString("state.description", ""), Limiter.maxDescriptionLength),
                 OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
                 Limiter.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), Limiter.maxDirectoryLength),
-                calculateFolderSize(depositPath.getParent()));
+                calculateFolderSize(depositPath));
 
             if (updateModificationDateTime) {
                 dp.setDepositUpdateTimestamp(OffsetDateTime.now());

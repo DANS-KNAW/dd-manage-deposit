@@ -31,25 +31,37 @@ import javax.ws.rs.core.Response;
 @Path("/")
 public class DepositPropertiesResource {
     private final DepositPropertiesDAO depositPropertiesDAO;
+    private final String helpInfo;
 
     public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
+        this.helpInfo = writeHelpInfoText();
+    }
+
+    private String writeHelpInfoText() {
+        return
+            "DD Manage Deposit is running. \n" +
+            "Usage: \n" +
+            "  - Create reports: GET  basePath/report \n" +
+            "  - Clean database: POST basePath/delete-deposit \n" +
+            "    Query string parameters: user, state, startdate, enddate \n" +
+            "    'startdate'/'enddate' format: yyyy-MM-dd \n" +
+            "    Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED \n" +
+            "  Examples: \n" +
+            "    curl -i -X GET  basePath/report?startdate=yyyy-MM-dd \n" +
+            "    curl -i -X GET basePath/delete-deposit?user=XXX&state=REJECTED \n" +
+            "    curl -i -X POST basePath/delete-deposit?user=XXX \n" +
+            "    curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED";
     }
 
     @GET
     @UnitOfWork
-    @Produces("text/plain")
     public Response getApiInformation() {
-        String response = "DD Manage Deposit is running. Usage: \n" +
-            "- POST path: basePath/" +
-            "- GET path: basePath/report \n" +
-            "- DELETE path: basePath/delete-deposit \n" +
-            "Parameters: user, state, startdate, enddate" +
-            "Examples: curl -i -X POST basePath/delete-deposit\\?depositId\\=9999-0001\\&user\\=XXX";
+
 
         return Response
             .status(Response.Status.OK)
-            .entity(response)
+            .entity(this.helpInfo)
             .type(MediaType.TEXT_PLAIN)
             .build();
     }
