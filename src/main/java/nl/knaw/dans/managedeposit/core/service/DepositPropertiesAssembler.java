@@ -47,9 +47,9 @@ class DepositPropertiesAssembler {
                 configuration.getString("depositor.userId", ""),
                 configuration.getString("bag-store.bag-name", ""),
                 configuration.getString("state.label", ""),
-                Limiter.stripEnd(configuration.getString("state.description", ""), Limiter.maxDescriptionLength),
+                TextTruncation.stripEnd(configuration.getString("state.description", ""), TextTruncation.maxDescriptionLength),
                 OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
-                Limiter.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), Limiter.maxDirectoryLength),
+                TextTruncation.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), TextTruncation.maxDirectoryLength),
                 calculateFolderSize(depositPath));
 
             if (updateModificationDateTime) {

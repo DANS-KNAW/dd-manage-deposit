@@ -18,7 +18,7 @@ package nl.knaw.dans.managedeposit;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import nl.knaw.dans.managedeposit.core.service.Limiter;
+import nl.knaw.dans.managedeposit.core.service.TextTruncation;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -52,7 +52,7 @@ public class DdManageDepositConfiguration extends Configuration {
     }
 
     public long getPollingInterval() {
-        return pollingInterval > 0 ? pollingInterval : Limiter.pollingInterval;
+        return pollingInterval > 0 ? pollingInterval : TextTruncation.pollingInterval;
     }
 
     public void setPollingInterval(long pollingInterval) {

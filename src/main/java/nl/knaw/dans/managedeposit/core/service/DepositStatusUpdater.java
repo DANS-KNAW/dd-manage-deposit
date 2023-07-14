@@ -42,8 +42,8 @@ public class DepositStatusUpdater {
         Optional<DepositProperties> dp = depositPropertiesDAO.findById(depositPropertiesFile.getParentFile().getName());
 
         if (dp.isPresent()) {
-            // The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Update the location column.
-//            Path currentFolder = depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3);
+            // The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location.
+            // Update the location column.
             Path depositLocationFolder = Path.of(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath());
             Optional<Integer> updatedNumber = depositPropertiesDAO.updateDepositLocation(dp.get().getDepositId(), depositLocationFolder);
             if (updatedNumber.isPresent())

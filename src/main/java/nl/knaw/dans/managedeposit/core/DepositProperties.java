@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.managedeposit.core;
 
-import nl.knaw.dans.managedeposit.core.service.Limiter;
+import nl.knaw.dans.managedeposit.core.service.TextTruncation;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,10 +49,10 @@ public class DepositProperties {
     @Column(name = "deposit_update_timestamp")                             // modified timestamp of deposit.properties
     private OffsetDateTime depositUpdateTimestamp;
 
-    @Column(name = "description", length = Limiter.maxDescriptionLength)   // state.description
+    @Column(name = "description", length = TextTruncation.maxDescriptionLength)   // state.description
     private String description;
 
-    @Column(name = "location", length = Limiter.maxDirectoryLength)        // full parent-path on disk
+    @Column(name = "location", length = TextTruncation.maxDirectoryLength)        // full parent-path on disk
     private String location;
 
     @Column(name = "storage_in_bytes")                                     // Total storage of deposit directory
@@ -167,6 +167,6 @@ public class DepositProperties {
 
     @Override
     public int hashCode() {
-        return 31 * depositId.hashCode() + depositCreationTimestamp.hashCode();
+        return 31 * depositId.hashCode() + depositor.hashCode();
     }
 }

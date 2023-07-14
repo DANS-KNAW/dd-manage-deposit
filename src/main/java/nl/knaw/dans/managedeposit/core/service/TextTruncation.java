@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.managedeposit.core.service;
 
-public class Limiter {
+public class TextTruncation {
     public static final long pollingInterval = 5 * 1000;
     public static final int maxDescriptionLength = 1024;
     public static final int maxDirectoryLength = 512;
