@@ -74,7 +74,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
             new Class[] { DepositPropertiesDAO.class },
             new Object[] { depositPropertiesDAO });
 
-        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor(configuration.getDepositBoxes(), depositStatusUpdater);
+        final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor(configuration.getDepositBoxes(), depositStatusUpdater, configuration.getPollingInterval());
         environment.lifecycle().manage(ingestPathMonitor);
 
     }

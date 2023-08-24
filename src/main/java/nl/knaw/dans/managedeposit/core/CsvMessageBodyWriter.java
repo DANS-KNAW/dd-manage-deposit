@@ -50,7 +50,10 @@ public class CsvMessageBodyWriter implements MessageBodyWriter<List<DepositPrope
             CsvMapper mapper = new CsvMapper();
             Object o = data.get(0);
             CsvSchema schema = mapper.schemaFor(o.getClass())
-                .withHeader();
+                .withHeader()
+                .sortedBy("depositor", "depositId", "bagName", "depositState", "depositCreationTimestamp", "depositUpdateTimestamp", "description", "location", "storageInBytes", "deleted")
+                    .rebuild().build();
+
             mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             mapper.registerModule(new JavaTimeModule());
             mapper.writer(schema).writeValue(outputStream, data);

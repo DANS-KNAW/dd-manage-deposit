@@ -13,8 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.managedeposit.core;
+package nl.knaw.dans.managedeposit.core.service;
 
-public enum State {
-    INBOX, FAILED, PROCESSED, REJECTED
+public class TextTruncation {
+    public static final long pollingInterval = 5 * 1000;
+    public static final int maxDescriptionLength = 1024;
+    public static final int maxDirectoryLength = 512;
+
+    public static String stripEnd(String text, int maxLength) {
+        return text.length() > maxLength ? text.substring(0, maxLength) : text;
+    }
+
+    public static String stripBegin(String text, int maxLength) {
+        int textLength = text.length();
+        return textLength > maxLength ? text.substring(textLength - maxLength) : text;
+    }
+
+
 }

@@ -15,10 +15,10 @@
  */
 package nl.knaw.dans.managedeposit.core;
 
+import nl.knaw.dans.managedeposit.core.service.TextTruncation;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -31,29 +31,35 @@ import java.time.OffsetDateTime;
     query = "SELECT dp FROM DepositProperties dp"
 )
 public class DepositProperties {
+
+    @Column(name = "depositor", nullable = false)                          // depositor.userId
+    private String depositor;
     @Id
-    @Column(name = "deposit_id", nullable = false)
+    @Column(name = "deposit_id", nullable = false)                         // deposit directory name
     private String depositId;
+    @Column(name = "bag_name", nullable = false)                           // Bag directory name
+    private String bagName;
 
-    @Column(name = "user_name")
-    private String userName;
+    @Column(name = "deposit_state")                                        // state.label
+    private String depositState;
 
-    @Column(name = "created_date")
-    private OffsetDateTime createdDate;
+    @Column(name = "deposit_creation_timestamp")                           // creation.timestamp
+    private OffsetDateTime depositCreationTimestamp;
 
-    @Column(name = "deleted")
+    @Column(name = "deposit_update_timestamp")                             // modified timestamp of deposit.properties
+    private OffsetDateTime depositUpdateTimestamp;
+
+    @Column(name = "description", length = TextTruncation.maxDescriptionLength)   // state.description
+    private String description;
+
+    @Column(name = "location", length = TextTruncation.maxDirectoryLength)        // full parent-path on disk
+    private String location;
+
+    @Column(name = "storage_in_bytes")                                     // Total storage of deposit directory
+    private long storageInBytes;
+
+    @Column(name = "deleted")                                              // deposit is deleted from inbox - archived
     private boolean deleted;
-
-    @Column(name = "state")
-    @Enumerated(EnumType.STRING)
-    private State state;
-
-    @Column(name = "status_path")
-    private String statusPath;
-
-    @Column(name = "deposit_path")
-    private String depositPath;
-
     public String getDepositId() {
         return depositId;
     }
@@ -61,72 +67,88 @@ public class DepositProperties {
     public DepositProperties() {
     }
 
-    public DepositProperties(String depositId, String userName, State state, String statusPath, String depositPath, boolean isDeleted) {
+    public DepositProperties(String depositId, String depositor, String bagName, String depositState,
+        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
         this.depositId = depositId;
-        this.userName = userName;
-        this.deleted = isDeleted;
-        this.state = state;
-        this.statusPath = statusPath;
-        this.depositPath = depositPath;
-
-        // get the current UTC timestamp or creation.timestamp from
-        this.createdDate = OffsetDateTime.now();
+        this.depositor = depositor;
+        this.bagName = bagName;
+        this.depositState = depositState;
+        this.description = description;
+        this.depositCreationTimestamp = depositCreationTimestamp;
+        this.location = location;
+        this.storageInBytes = storageInBytes;
     }
 
-    public void setDepositId(String depositId) {
-        this.depositId = depositId;
+    public String getDepositor() {
+        return depositor;
     }
 
-    public String getUserName() {
-        return userName;
+    public void setDepositor(String depositor) {
+        this.depositor = depositor;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public String getBagName() {
+        return bagName;
+    }
+
+    public void setBagName(String bagName) {
+        this.bagName = bagName;
+    }
+
+    public String getDepositState() {
+        return depositState;
+    }
+
+    public void setDepositState(String depositState) {
+        this.depositState = depositState;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public OffsetDateTime getDepositCreationTimestamp() {
+        return depositCreationTimestamp;
+    }
+
+    public void setDepositCreationTimestamp(OffsetDateTime depositCreationTimestamp) {
+        this.depositCreationTimestamp = depositCreationTimestamp;
+    }
+
+    public OffsetDateTime getDepositUpdateTimestamp() {
+        return depositUpdateTimestamp;
+    }
+
+    public void setDepositUpdateTimestamp(OffsetDateTime depositUpdateTimestamp) {
+        this.depositUpdateTimestamp = depositUpdateTimestamp;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isDeleted() {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public boolean setDeleted(boolean deleted) {
+        return this.deleted = deleted;
     }
 
-    public OffsetDateTime getCreatedDate() {
-        return createdDate;
+    public long getStorageInBytes() {
+        return storageInBytes;
     }
 
-    public void setCreatedDate(OffsetDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public void setState(State state) {
-        this.state = state;
-    }
-
-    public void setState(String state) {
-        this.state = State.valueOf(state.toUpperCase());
-    }
-
-    public State getState() {
-        return state;
-    }
-
-    public String getStatusPath() {
-        return statusPath;
-    }
-
-    public void setStatusPath(String statusPath) {
-        this.statusPath = statusPath;
-    }
-
-    public String getDepositPath() {
-        return depositPath;
-    }
-
-    public void setDepositPath(String depositPath) {
-        this.depositPath = depositPath;
+    public void setStorageInBytes(long storageInBytes) {
+        this.storageInBytes = storageInBytes;
     }
 
     @Override
@@ -140,11 +162,11 @@ public class DepositProperties {
 
         if (!depositId.equals(that.depositId))
             return false;
-        return createdDate.equals(that.createdDate);
+        return depositCreationTimestamp.equals(that.depositCreationTimestamp);
     }
 
     @Override
     public int hashCode() {
-        return 31 * depositId.hashCode() + createdDate.hashCode();
+        return 31 * depositId.hashCode() + depositor.hashCode();
     }
 }

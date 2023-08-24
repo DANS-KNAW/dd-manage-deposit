@@ -16,13 +16,16 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.core.State;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 class DepositPropertiesAssembler {
@@ -31,25 +34,52 @@ class DepositPropertiesAssembler {
     DepositPropertiesAssembler() {
     }
 
-    Optional<DepositProperties> assembleObject(Path depositPropertiesPath, boolean deleted) {
-        log.debug("assembleObject: '{}'", depositPropertiesPath.getNameCount() - 3);
+    Optional<DepositProperties> assembleObject(File depositPropertiesFile, boolean  updateModificationDateTime) {
+
+        Path depositPath = depositPropertiesFile.getParentFile().toPath();
+        log.debug("assembleObject(depositPropertiesPath:Path): '{}'", depositPropertiesFile.getAbsolutePath());
         DepositProperties dp; // = null
         Configuration configuration;
         try {
-            configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesPath);
-            dp = new DepositProperties(configuration.getString("depositId"),
-                configuration.getString("userName"),
-                //State.valueOf(configuration.getString("state").toUpperCase()),
-                State.INBOX,
-                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 3).toString(),
-                depositPropertiesPath.getName(depositPropertiesPath.getNameCount() - 2).toString(),
-                deleted);
+            configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesFile);
+
+            dp = new DepositProperties(depositPath.getFileName().toString(),
+                configuration.getString("depositor.userId", ""),
+                configuration.getString("bag-store.bag-name", ""),
+                configuration.getString("state.label", ""),
+                TextTruncation.stripEnd(configuration.getString("state.description", ""), TextTruncation.maxDescriptionLength),
+                OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
+                TextTruncation.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), TextTruncation.maxDirectoryLength),
+                calculateFolderSize(depositPath));
+
+            if (updateModificationDateTime) {
+                dp.setDepositUpdateTimestamp(OffsetDateTime.now());
+            }
+            else {
+                dp.setDepositUpdateTimestamp(dp.getDepositCreationTimestamp());
+            }
+
         }
         catch (ConfigurationException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return Optional.of(dp);
+    }
+
+    private long calculateFolderSize(Path path) {
+        long size;
+        try (var pathStream = Files.walk(path)) {
+            size = pathStream
+                .filter(p -> p.toFile().isFile())
+                .mapToLong(p -> p.toFile().length())
+                .sum();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return size;
     }
 
 }
