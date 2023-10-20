@@ -16,7 +16,7 @@
 
 package nl.knaw.dans.managedeposit;
 
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import nl.knaw.dans.managedeposit.core.service.TextTruncation;
 
