@@ -18,7 +18,7 @@ depositBoxes:
   - /var/opt/dans.knaw.nl/tmp/auto-ingest/outbox/failed
   - /var/opt/dans.knaw.nl/tmp/sword2-uploads
 
-pollingInterval: 5000
+pollingInterval: 50
 
 depositPropertiesDatabase:
   driverClass: org.postgresql.Driver
