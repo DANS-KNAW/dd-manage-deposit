@@ -47,13 +47,13 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     }
 
     private void startMonitors() throws Exception {
-        IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(), HiddenFileFilter.VISIBLE);
-        IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
-        IOFileFilter filter = FileFilterUtils.or(directories, files);
-
-        log.info("Starting 'IngestPathMonitor', file filter: deposit.properties");
+        log.info("Starting 'IngestPathMonitor', file filter: deposit.properties, directory depth: only first child of the base folder");
 
         for (Path folder : toMonitorPaths) {
+            IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(), new DepthFileFilter(folder, 1));
+            IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
+            IOFileFilter filter = FileFilterUtils.or(directories, files);
+
             FileAlterationObserver observer = new FileAlterationObserver(folder.toFile(), filter);
 
             observer.addListener(this);
