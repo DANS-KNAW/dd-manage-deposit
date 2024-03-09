@@ -34,8 +34,8 @@ class DepositPropertiesFileReader {
         var paramConfig = params.properties().setFileName(propertiesFile.getAbsolutePath());
 
         FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>
-            (PropertiesConfiguration.class, null, true)
-            .configure(paramConfig);
+                (PropertiesConfiguration.class, null, true)
+                .configure(paramConfig);
 
         return builder.getConfiguration();
     }
