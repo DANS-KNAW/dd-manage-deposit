@@ -18,7 +18,6 @@ package nl.knaw.dans.managedeposit.core.service;
 import io.dropwizard.lifecycle.Managed;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.HiddenFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -47,31 +46,31 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     }
 
     private void startMonitors() throws Exception {
-        log.info("Starting 'IngestPathMonitor', file filter: deposit.properties, directory depth: only first child of the base folder");
+        log.info("Starting 'IngestPathMonitor', with file filter: deposit.properties");
 
+        List<FileAlterationObserver> observers = new ArrayList<>();
         for (Path folder : toMonitorPaths) {
-            IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(), new DepthFileFilter(folder, 1));
+            IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(),/*HiddenFileFilter.VISIBLE*/new DepthFileFilter(folder, 1));
             IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
             IOFileFilter filter = FileFilterUtils.or(directories, files);
 
             FileAlterationObserver observer = new FileAlterationObserver(folder.toFile(), filter);
-
             observer.addListener(this);
+            observers.add(observer);
 
-            FileAlterationMonitor monitor = new FileAlterationMonitor(this.pollingInterval, observer);
-            fileAlterationMonitors.add(monitor);
-
-            monitor.start();
-            log.debug("'IngestPathMonitor' is going to monitor the folder '{}'", folder);
         }
+
+        FileAlterationMonitor monitor = new FileAlterationMonitor(this.pollingInterval, observers.toArray(new FileAlterationObserver[0]));
+        fileAlterationMonitors.add(monitor);
+        log.debug("'IngestPathMonitor' is going to monitor the folders\n '{}'", toMonitorPaths);
+        monitor.start();
     }
 
     @Override
     public void start() throws Exception {
         try {
             startMonitors();
-        }
-        catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new InvalidTransferItemException(e.getMessage());
         }
@@ -84,8 +83,7 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
         fileAlterationMonitors.forEach(monitor -> {
             try {
                 monitor.stop();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
@@ -94,19 +92,19 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     @Override
     public void onFileCreate(File file) {
         log.debug("onFileCreate: '{}'", file.getAbsolutePath());
-        depositStatusUpdater.onCreateDeposit(file);
+        depositStatusUpdater.onDepositCreate(file);
     }
 
     @Override
     public void onFileDelete(File file) {
         log.debug("onFileDelete: '{}'", file.getAbsolutePath());
-        depositStatusUpdater.onDeleteDeposit(file);
+        depositStatusUpdater.onDepositDelete(file);
     }
 
     @Override
     public void onFileChange(File file) {
         log.debug("onFileChange: '{}'", file.getAbsolutePath());
-        depositStatusUpdater.onChangeDeposit(file);
+        depositStatusUpdater.onDepositChange(file);
     }
 
 }

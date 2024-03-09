@@ -24,19 +24,26 @@ public class DepthFileFilter extends AbstractFileFilter {
     private final Path baseFolder;
     private final int depthLimit;
 
-    public DepthFileFilter(Path baseFolder, int depthLimit) {
-        this.baseFolder = baseFolder;
+    public DepthFileFilter(Path baserFolder, int depthLimit) {
+        this.baseFolder = baserFolder;
         this.depthLimit = depthLimit;
-
     }
 
-    public boolean accept(File file) {
+    private boolean confirmParent(File file) {
         Path parent = file.toPath();
         for (int depth = 0; depth < this.depthLimit; depth++)
             parent = parent.getParent();
-        if (parent.endsWith(this.baseFolder))
-            return true;
 
-        return false;
+        return parent.endsWith(this.baseFolder);
+    }
+
+    @Override
+    public boolean accept(File file) {
+        return confirmParent(file);
+    }
+
+    @Override
+    public boolean accept(File dir, String name) {
+        return confirmParent(dir);
     }
 }

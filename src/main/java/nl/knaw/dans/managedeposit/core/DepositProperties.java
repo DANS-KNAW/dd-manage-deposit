@@ -17,19 +17,17 @@ package nl.knaw.dans.managedeposit.core;
 
 import nl.knaw.dans.managedeposit.core.service.TextTruncation;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "deposit_properties")
 @NamedQuery(
-    name = "showAll",
-    query = "SELECT dp FROM DepositProperties dp"
+        name = "showAll",
+        query = "SELECT dp FROM DepositProperties dp"
 )
+
+@SuppressWarnings("unused")
 public class DepositProperties {
 
     @Column(name = "depositor", nullable = false)                          // depositor.userId
@@ -49,10 +47,10 @@ public class DepositProperties {
     @Column(name = "deposit_update_timestamp")                             // modified timestamp of deposit.properties
     private OffsetDateTime depositUpdateTimestamp;
 
-    @Column(name = "description", length = TextTruncation.maxDescriptionLength)   // state.description
+    @Column(name = "description", length = TextTruncation.MAX_DESCRIPTION_LENGTH)   // state.description
     private String description;
 
-    @Column(name = "location", length = TextTruncation.maxDirectoryLength)        // full parent-path on disk
+    @Column(name = "location", length = TextTruncation.MAX_DIRECTORY_LENGTH)        // full parent-path on disk
     private String location;
 
     @Column(name = "storage_in_bytes")                                     // Total storage of deposit directory
@@ -60,15 +58,12 @@ public class DepositProperties {
 
     @Column(name = "deleted")                                              // deposit is deleted from inbox - archived
     private boolean deleted;
-    public String getDepositId() {
-        return depositId;
-    }
 
     public DepositProperties() {
     }
 
     public DepositProperties(String depositId, String depositor, String bagName, String depositState,
-        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
+                             String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
         this.depositId = depositId;
         this.depositor = depositor;
         this.bagName = bagName;
@@ -77,6 +72,10 @@ public class DepositProperties {
         this.depositCreationTimestamp = depositCreationTimestamp;
         this.location = location;
         this.storageInBytes = storageInBytes;
+    }
+
+    public String getDepositId() {
+        return depositId;
     }
 
     public String getDepositor() {

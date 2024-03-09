@@ -17,11 +17,11 @@
 package nl.knaw.dans.managedeposit;
 
 import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import io.dropwizard.core.setup.Bootstrap;
-import io.dropwizard.core.setup.Environment;
 import nl.knaw.dans.managedeposit.core.CsvMessageBodyWriter;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.service.DepositStatusUpdater;
@@ -34,18 +34,18 @@ import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
+    private final HibernateBundle<DdManageDepositConfiguration> depositPropertiesHibernate =
+            new HibernateBundle<>(DepositProperties.class) {
+
+                @Override
+                public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
+                    return configuration.getDepositPropertiesDatabase();
+                }
+            };
+
     public static void main(final String[] args) throws Exception {
         new DdManageDepositApplication().run(args);
     }
-
-    private final HibernateBundle<DdManageDepositConfiguration> depositPropertiesHibernate =
-        new HibernateBundle<>(DepositProperties.class) {
-
-            @Override
-            public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
-                return configuration.getDepositPropertiesDatabase();
-            }
-        };
 
     @Override
     public String getName() {
@@ -70,13 +70,10 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
         final UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
         DepositStatusUpdater depositStatusUpdater = proxyFactory.create(
-            DepositStatusUpdater.class,
-            new Class[] { DepositPropertiesDAO.class },
-            new Object[] { depositPropertiesDAO });
+                DepositStatusUpdater.class, DepositPropertiesDAO.class, depositPropertiesDAO);
 
         final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor(configuration.getDepositBoxes(), depositStatusUpdater, configuration.getPollingInterval());
         environment.lifecycle().manage(ingestPathMonitor);
-
     }
 
 }
