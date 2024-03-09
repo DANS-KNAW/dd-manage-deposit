@@ -37,7 +37,6 @@ public class DepositPropertiesResource {
     private String writeHelpInfoText() {
         return
                 """
-                        This is DD-1438-Fix-Problems-found-DD1419
                         DD Manage Deposit is running.\s
                         Usage:\s
                           - Create reports: GET  basePath/report\s
@@ -47,7 +46,7 @@ public class DepositPropertiesResource {
                             Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
                           Examples:\s
                             curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
-                            curl -i -X GET basePath/delete-deposit?user=XXX&state=REJECTED\s
+                            curl -i -X GET  basePath/delete-deposit?user=XXX&state=REJECTED\s
                             curl -i -X POST basePath/delete-deposit?user=XXX\s
                             curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED""";
     }
