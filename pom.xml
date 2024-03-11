@@ -150,8 +150,7 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
                 <file>
-                    <exists>/opt/local/bin/rpm</exists>
-<!--                    <exists>/usr/local/bin/rpm</exists>-->
+                    <exists>/usr/local/bin/rpm</exists>
                 </file>
             </activation>
             <build>
