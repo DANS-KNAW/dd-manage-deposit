@@ -20,13 +20,7 @@ import nl.knaw.dans.managedeposit.core.DepositProperties;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.nio.file.Path;
+import javax.persistence.criteria.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -70,7 +64,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
     public List<DepositProperties> findSelection(Map<String, List<String>> queryParameters) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
 
-        if (queryParameters.size() == 0)
+        if (queryParameters.isEmpty())
             return findAll();
 
         CriteriaQuery<DepositProperties> criteriaQuery = criteriaBuilder.createQuery(DepositProperties.class);
@@ -83,7 +77,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
         var criteriaBuilder = currentSession().getCriteriaBuilder();
-        if (queryParameters.size() == 0)                   // Note: all records will be deleted (accidentally) without any specified query parameter
+        if (queryParameters.isEmpty())                   // Note: all records will be deleted (accidentally) without any specified query parameter
             return Optional.of(0);
 
         CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
@@ -164,20 +158,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         criteriaUpdate.where(predicate);
 
         criteriaUpdate.set("deleted", deleted);
-
-        var query = currentSession().createQuery(criteriaUpdate);
-        return Optional.of(query.executeUpdate());
-    }
-
-    public Optional<Integer> updateDepositLocation(String depositId, Path currentParentPath) {
-        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
-        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
-        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
-
-        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
-        criteriaUpdate.where(predicate);
-
-        criteriaUpdate.set("location", currentParentPath.toString());
 
         var query = currentSession().createQuery(criteriaUpdate);
         return Optional.of(query.executeUpdate());

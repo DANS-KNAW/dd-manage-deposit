@@ -18,11 +18,7 @@ package nl.knaw.dans.managedeposit.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
