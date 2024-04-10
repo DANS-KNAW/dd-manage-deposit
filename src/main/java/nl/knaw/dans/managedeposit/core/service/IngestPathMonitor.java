@@ -48,7 +48,7 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     private void startMonitors() throws Exception {
         log.info("Starting 'IngestPathMonitor', with file filter: deposit.properties");
 
-        List<FileAlterationObserver> observers = new ArrayList<>();
+        var observers = new ArrayList<>();
         for (Path folder : toMonitorPaths) {
             IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(),/*HiddenFileFilter.VISIBLE*/new DepthFileFilter(folder, 1));
             IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
