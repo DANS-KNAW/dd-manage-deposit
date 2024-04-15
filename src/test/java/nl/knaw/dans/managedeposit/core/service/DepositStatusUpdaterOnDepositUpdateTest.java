@@ -70,6 +70,7 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
 
         // Check the database
         assertThat(dao.findById("bag")).isNotEmpty().get()
+            .extracting("bagName")
             .isEqualTo("revision03");
         assertThat(dao.findAll()).isNotEmpty();
     }

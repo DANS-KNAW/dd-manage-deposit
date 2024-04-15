@@ -50,8 +50,15 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
         var observers = new ArrayList<>();
         for (Path folder : toMonitorPaths) {
-            IOFileFilter directories = FileFilterUtils.and(FileFilterUtils.directoryFileFilter(),/*HiddenFileFilter.VISIBLE*/new DepthFileFilter(folder, 1));
-            IOFileFilter files = FileFilterUtils.and(FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE));
+            IOFileFilter directories = FileFilterUtils.and(
+                FileFilterUtils.directoryFileFilter(),
+                new DepthFileFilter(folder, 1)
+            );
+            IOFileFilter files = FileFilterUtils.and(
+                FileFilterUtils.fileFileFilter(),
+                FileFilterUtils.nameFileFilter("deposit.properties", IOCase.INSENSITIVE),
+                new DepthFileFilter(folder, 2)
+            );
             IOFileFilter filter = FileFilterUtils.or(directories, files);
 
             FileAlterationObserver observer = new FileAlterationObserver(folder.toFile(), filter);
@@ -70,7 +77,8 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     public void start() throws Exception {
         try {
             startMonitors();
-        } catch (IOException | InterruptedException e) {
+        }
+        catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new InvalidTransferItemException(e.getMessage());
         }
@@ -83,7 +91,8 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
         fileAlterationMonitors.forEach(monitor -> {
             try {
                 monitor.stop();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
