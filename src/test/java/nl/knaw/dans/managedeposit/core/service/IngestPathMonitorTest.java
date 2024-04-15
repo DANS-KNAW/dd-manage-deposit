@@ -19,10 +19,12 @@ import nl.knaw.dans.managedeposit.AbstractTestWithTestDir;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.nio.file.Files;
 
 import static java.nio.file.Files.createDirectories;
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
 
 public class IngestPathMonitorTest extends AbstractTestWithTestDir {
 
@@ -43,7 +45,8 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         var tempFile = Files.createFile(testDir.resolve("deposit.properties"));
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(0)).onDepositCreate(tempFile.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(0))
+            .onDepositCreate(tempFile.toFile());
 
         monitor.stop();
     }
@@ -79,7 +82,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
     }
 
     @Test
-    public void should_pick_up_a_bag() throws Exception {
+    public void should_ignore_a_bag_without_deposit_properties() throws Exception {
         var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
         var monitor = startMonitor(mockUpdater, 50);
 
@@ -87,7 +90,8 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         createDirectories(bagDir);
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(bagDir.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(0))
+            .onDepositCreate(any(File.class));
 
         monitor.stop();
     }
@@ -101,7 +105,8 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         createDirectories(dirInBag);
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(0)).onDepositCreate(dirInBag.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(0))
+            .onDepositCreate(dirInBag.toFile());
 
         monitor.stop();
     }
