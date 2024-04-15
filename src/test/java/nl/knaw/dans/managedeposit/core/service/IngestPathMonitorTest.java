@@ -43,7 +43,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         var tempFile = Files.createFile(testDir.resolve("deposit.properties"));
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(0)).onCreateDeposit(tempFile.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(0)).onDepositCreate(tempFile.toFile());
 
         monitor.stop();
     }
@@ -58,7 +58,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         Files.createFile(propertiesFile);
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(1)).onCreateDeposit(propertiesFile.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(propertiesFile.toFile());
 
         monitor.stop();
     }
@@ -73,7 +73,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         Files.createFile(propertiesFile);
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(0)).onCreateDeposit(propertiesFile.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(0)).onDepositCreate(propertiesFile.toFile());
 
         monitor.stop();
     }
@@ -87,7 +87,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         createDirectories(bagDir);
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(1)).onCreateDeposit(bagDir.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(bagDir.toFile());
 
         monitor.stop();
     }
@@ -101,7 +101,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         createDirectories(dirInBag);
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
-        Mockito.verify(mockUpdater, Mockito.times(0)).onCreateDeposit(dirInBag.toFile());
+        Mockito.verify(mockUpdater, Mockito.times(0)).onDepositCreate(dirInBag.toFile());
 
         monitor.stop();
     }
