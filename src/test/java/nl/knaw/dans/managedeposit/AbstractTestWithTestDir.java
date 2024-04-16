@@ -20,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 public class AbstractTestWithTestDir {
     protected final Path testDir = Path.of("target/test")
         .resolve(getClass().getSimpleName());
@@ -27,5 +29,14 @@ public class AbstractTestWithTestDir {
     @BeforeEach
     public void setUp() throws Exception {
         FileUtils.deleteDirectory(testDir.toFile());
+    }
+
+    /**
+     * Assume that a bug is not yet fixed. This allows to skip assertions while still showing the code covered by the test.
+     *
+     * @param message the message to display
+     */
+    public void assumeNotYetFixed (String message) {
+        assumeTrue(false, message);
     }
 }

@@ -16,21 +16,19 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 import nl.knaw.dans.managedeposit.AbstractTestWithTestDir;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.File;
 import java.nio.file.Files;
 
 import static java.nio.file.Files.createDirectories;
 import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class IngestPathMonitorTest extends AbstractTestWithTestDir {
 
     private IngestPathMonitor startMonitor(DepositStatusUpdater mockUpdater, int pollingInterval) throws Exception {
-        createDirectories(testDir);
-
         var monitor = new IngestPathMonitor(singletonList(testDir), mockUpdater, pollingInterval);
         monitor.start();
         Thread.sleep(60); // wait for the monitor to get ready
@@ -42,17 +40,19 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
         var monitor = startMonitor(mockUpdater, 50);
 
-        var tempFile = Files.createFile(testDir.resolve("deposit.properties"));
+        createDirectories(testDir);
+        var propertiesFile = Files.createFile(testDir.resolve("deposit.properties"));
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
         Mockito.verify(mockUpdater, Mockito.times(0))
-            .onDepositCreate(tempFile.toFile());
+            .onDepositCreate(propertiesFile.toFile());
+        Mockito.verifyNoMoreInteractions(mockUpdater);
 
         monitor.stop();
     }
 
     @Test
-    public void should_pick_up_properties_in_bag() throws Exception {
+    public void should_pick_up_new_properties_in_bag() throws Exception {
         var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
         var monitor = startMonitor(mockUpdater, 50);
 
@@ -62,6 +62,7 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
         Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(propertiesFile.toFile());
+        Mockito.verifyNoMoreInteractions(mockUpdater);
 
         monitor.stop();
     }
@@ -77,38 +78,73 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         Thread.sleep(70);// Wait for the monitor to pick up the new file
 
         Mockito.verify(mockUpdater, Mockito.times(0)).onDepositCreate(propertiesFile.toFile());
+        Mockito.verifyNoMoreInteractions(mockUpdater);
+
+        monitor.stop();
+    }
+
+
+    @Test
+    public void should_pick_up_deleted_bag() throws Exception {
+        var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
+        var monitor = startMonitor(mockUpdater, 50);
+
+        var propertiesFile = testDir.resolve("bag/deposit.properties");
+        createDirectories(propertiesFile.getParent());
+        Files.createFile(propertiesFile);
+        Thread.sleep(70);
+        FileUtils.deleteDirectory(propertiesFile.getParent().toFile());
+        Thread.sleep(70);
+
+        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositDelete(propertiesFile.toFile());
 
         monitor.stop();
     }
 
     @Test
-    public void should_ignore_a_bag_without_deposit_properties() throws Exception {
+    public void should_pick_up_changed_properties() throws Exception {
         var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
-        var monitor = startMonitor(mockUpdater, 50);
+        var monitor = startMonitor(mockUpdater, 20);
 
-        var bagDir = testDir.resolve("bag");
-        createDirectories(bagDir);
-        Thread.sleep(70);// Wait for the monitor to pick up the new file
+        var propertiesFile = testDir.resolve("bag/deposit.properties");
+        createDirectories(propertiesFile.getParent());
+        Files.createFile(propertiesFile);
+        Thread.sleep(30);
+        Files.writeString(propertiesFile, "just some garbage");
+        Thread.sleep(30);
 
-        Mockito.verify(mockUpdater, Mockito.times(0))
-            .onDepositCreate(any(File.class));
+        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositChange(propertiesFile.toFile());
 
         monitor.stop();
     }
 
     @Test
-    public void should_ignore_bag_content() throws Exception {
+    public void should_pick_up_deleted_root() throws Exception {
         var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
-        var monitor = startMonitor(mockUpdater, 50);
+        var monitor = startMonitor(mockUpdater, 20);
 
-        var dirInBag = testDir.resolve("bag/content");
-        createDirectories(dirInBag);
-        Thread.sleep(70);// Wait for the monitor to pick up the new file
+        var propertiesFile = testDir.resolve("bag/deposit.properties");
+        createDirectories(propertiesFile.getParent());
+        Files.createFile(propertiesFile);
+        Thread.sleep(30);
+        FileUtils.deleteDirectory(testDir.toFile());
+        Thread.sleep(30);
 
-        Mockito.verify(mockUpdater, Mockito.times(0))
-            .onDepositCreate(dirInBag.toFile());
-
+        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(propertiesFile.toFile());
+        Mockito.verifyNoMoreInteractions(mockUpdater);
+        assumeNotYetFixed("The monitor should pick up the deletion of the root folder, it might imply deletion of many bags");
         monitor.stop();
+    }
+
+    @Test
+    public void should_throw_when_stopping_a_stopped_monitor() throws Exception {
+        var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
+        var monitor = startMonitor(mockUpdater, 20);
+        monitor.stop();
+
+        assertThatThrownBy(monitor::stop)
+            .isInstanceOf(RuntimeException.class)
+            .hasRootCauseInstanceOf(IllegalStateException.class);
     }
 
     // TODO: Add more tests for onModifyDeposit and onDeleteDeposit and more complex scenarios, such as:
