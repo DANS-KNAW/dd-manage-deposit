@@ -75,8 +75,7 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
             .hasFieldOrPropertyWithValue("location", testDir.toAbsolutePath().toString())
             .hasFieldOrPropertyWithValue("storageInBytes", 113L);
 
-        assertThat(dao.findAll()).isEmpty();
-        assumeNotYetFixed("findAll should also return the record");
+        assertThat(dao.findAll()).isNotEmpty();
     }
 
     // TODO: other scenario's and test classes for onChangeDeposit and onDeleteDeposit
