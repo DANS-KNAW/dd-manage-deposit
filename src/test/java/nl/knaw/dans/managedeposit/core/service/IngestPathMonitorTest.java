@@ -146,9 +146,4 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
             .isInstanceOf(RuntimeException.class)
             .hasRootCauseInstanceOf(IllegalStateException.class);
     }
-
-    // TODO: Add more tests for onModifyDeposit and onDeleteDeposit and more complex scenarios, such as:
-    //  events while the monitor was down
-    //  not existing dir when starting the monitor
-    //  disappearing dir while monitoring, etc.
 }
