@@ -66,7 +66,7 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
         assertThat(formattedMessage).endsWith("DepositStatusUpdaterOnDepositUpdateTest/bag'");
 
         // Check the database
-        var maybyDepositProperties = daoTestExtension.inTransaction(() -> 
+        var maybeDepositProperties = daoTestExtension.inTransaction(() -> 
             dao.findById("bag")
         );
         assertThat(maybeDepositProperties).isNotEmpty().get()
