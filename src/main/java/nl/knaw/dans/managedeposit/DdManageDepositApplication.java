@@ -35,13 +35,13 @@ import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
     private final HibernateBundle<DdManageDepositConfiguration> depositPropertiesHibernate =
-            new HibernateBundle<>(DepositProperties.class) {
+        new HibernateBundle<>(DepositProperties.class) {
 
-                @Override
-                public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
-                    return configuration.getDepositPropertiesDatabase();
-                }
-            };
+            @Override
+            public DataSourceFactory getDataSourceFactory(DdManageDepositConfiguration configuration) {
+                return configuration.getDepositPropertiesDatabase();
+            }
+        };
 
     public static void main(final String[] args) throws Exception {
         new DdManageDepositApplication().run(args);
@@ -70,7 +70,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
         final UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
         DepositStatusUpdater depositStatusUpdater = proxyFactory.create(
-                DepositStatusUpdater.class, DepositPropertiesDAO.class, depositPropertiesDAO);
+            DepositStatusUpdater.class, DepositPropertiesDAO.class, depositPropertiesDAO);
 
         final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor(configuration.getDepositBoxes(), depositStatusUpdater, configuration.getPollingInterval());
         environment.lifecycle().manage(ingestPathMonitor);

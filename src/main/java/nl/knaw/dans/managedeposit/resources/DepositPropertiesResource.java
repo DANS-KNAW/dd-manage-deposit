@@ -20,7 +20,11 @@ import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -36,31 +40,30 @@ public class DepositPropertiesResource {
 
     private String writeHelpInfoText() {
         return
-                """
-                        DD Manage Deposit is running.\s
-                        Usage:\s
-                          - Create reports: GET  basePath/report\s
-                          - Clean database: POST basePath/delete-deposit\s
-                            Query string parameters: user, state, startdate, enddate\s
-                            'startdate'/'enddate' format: yyyy-MM-dd\s
-                            Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
-                          Examples:\s
-                            curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
-                            curl -i -X GET  basePath/delete-deposit?user=XXX&state=REJECTED\s
-                            curl -i -X POST basePath/delete-deposit?user=XXX\s
-                            curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED""";
+            """
+                DD Manage Deposit is running.\s
+                Usage:\s
+                  - Create reports: GET  basePath/report\s
+                  - Clean database: POST basePath/delete-deposit\s
+                    Query string parameters: user, state, startdate, enddate\s
+                    'startdate'/'enddate' format: yyyy-MM-dd\s
+                    Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
+                  Examples:\s
+                    curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
+                    curl -i -X GET  basePath/delete-deposit?user=XXX&state=REJECTED\s
+                    curl -i -X POST basePath/delete-deposit?user=XXX\s
+                    curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED""";
     }
 
     @GET
     @UnitOfWork
     public Response getApiInformation() {
 
-
         return Response
-                .status(Response.Status.OK)
-                .entity(this.helpInfo)
-                .type(MediaType.TEXT_PLAIN)
-                .build();
+            .status(Response.Status.OK)
+            .entity(this.helpInfo)
+            .type(MediaType.TEXT_PLAIN)
+            .build();
     }
 
     @POST

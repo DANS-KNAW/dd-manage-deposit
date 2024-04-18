@@ -27,8 +27,8 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "deposit_properties")
 @NamedQuery(
-        name = "showAll",
-        query = "SELECT dp FROM DepositProperties dp"
+    name = "showAll",
+    query = "SELECT dp FROM DepositProperties dp"
 )
 
 @SuppressWarnings("unused")
@@ -67,7 +67,7 @@ public class DepositProperties {
     }
 
     public DepositProperties(String depositId, String depositor, String bagName, String depositState,
-                             String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
+        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
         this.depositId = depositId;
         this.depositor = depositor;
         this.bagName = bagName;

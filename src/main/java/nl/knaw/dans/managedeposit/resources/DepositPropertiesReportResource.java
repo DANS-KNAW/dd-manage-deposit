@@ -19,7 +19,11 @@ import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
@@ -35,7 +39,7 @@ public class DepositPropertiesReportResource {
 
     @GET
     @UnitOfWork
-    @Produces({"application/json", "text/csv"})
+    @Produces({ "application/json", "text/csv" })
     public List<DepositProperties> listDepositProperties(@Context UriInfo uriInfo) {
         return depositPropertiesDAO.findSelection(uriInfo.getQueryParameters());
     }

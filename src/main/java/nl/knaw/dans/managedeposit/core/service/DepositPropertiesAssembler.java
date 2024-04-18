@@ -44,21 +44,23 @@ class DepositPropertiesAssembler {
             configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesFile);
 
             dp = new DepositProperties(depositPath.getFileName().toString(),
-                    configuration.getString("depositor.userId", ""),
-                    configuration.getString("bag-store.bag-name", ""),
-                    configuration.getString("state.label", ""),
-                    TextTruncation.stripEnd(configuration.getString("state.description", ""), TextTruncation.MAX_DESCRIPTION_LENGTH),
-                    OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
-                    TextTruncation.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), TextTruncation.MAX_DIRECTORY_LENGTH),
-                    CalculatedFolderSize == 0 ? calculateFolderSize(depositPath) : CalculatedFolderSize);
+                configuration.getString("depositor.userId", ""),
+                configuration.getString("bag-store.bag-name", ""),
+                configuration.getString("state.label", ""),
+                TextTruncation.stripEnd(configuration.getString("state.description", ""), TextTruncation.MAX_DESCRIPTION_LENGTH),
+                OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
+                TextTruncation.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), TextTruncation.MAX_DIRECTORY_LENGTH),
+                CalculatedFolderSize == 0 ? calculateFolderSize(depositPath) : CalculatedFolderSize);
 
             if (updateModificationDateTime) {
                 dp.setDepositUpdateTimestamp(OffsetDateTime.now());
-            } else {
+            }
+            else {
                 dp.setDepositUpdateTimestamp(dp.getDepositCreationTimestamp());
             }
 
-        } catch (ConfigurationException e) {
+        }
+        catch (ConfigurationException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
@@ -70,10 +72,11 @@ class DepositPropertiesAssembler {
         if (Files.exists(path)) {
             try (var pathStream = Files.walk(path)) {
                 size = pathStream
-                        .filter(p -> p.toFile().isFile())
-                        .mapToLong(p -> p.toFile().length())
-                        .sum();
-            } catch (IOException e) {
+                    .filter(p -> p.toFile().isFile())
+                    .mapToLong(p -> p.toFile().length())
+                    .sum();
+            }
+            catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }

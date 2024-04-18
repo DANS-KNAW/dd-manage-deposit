@@ -16,25 +16,28 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 import org.apache.commons.io.filefilter.AbstractFileFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;
 
 public class DepthFileFilter extends AbstractFileFilter {
-    private final Path baseFolder;
-    private final int depthLimit;
+    private static final Logger log = LoggerFactory.getLogger(DepthFileFilter.class);
+    private final Path absoluteBaseFolder;
+    private final int requiredNameCount;
 
-    public DepthFileFilter(Path baserFolder, int depthLimit) {
-        this.baseFolder = baserFolder;
-        this.depthLimit = depthLimit;
+    public DepthFileFilter(Path baseFolder, int depthLimit) {
+        this.absoluteBaseFolder = baseFolder.toAbsolutePath();
+        this.requiredNameCount = this.absoluteBaseFolder.getNameCount() + depthLimit;
     }
 
     private boolean confirmParent(File file) {
-        Path parent = file.toPath();
-        for (int depth = 0; depth < this.depthLimit; depth++)
-            parent = parent.getParent();
-
-        return parent.endsWith(this.baseFolder);
+        var path = file.getAbsoluteFile().toPath();
+        if (!path.startsWith(absoluteBaseFolder)) {
+            log.warn(String.format("[%s] must be a child of [%s]", path, absoluteBaseFolder));
+        }
+        return path.getNameCount() == requiredNameCount;
     }
 
     @Override

@@ -28,5 +28,4 @@ public class TextTruncation {
         return textLength > maxLength ? text.substring(textLength - maxLength) : text;
     }
 
-
 }

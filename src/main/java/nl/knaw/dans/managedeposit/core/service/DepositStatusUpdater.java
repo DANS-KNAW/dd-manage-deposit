@@ -47,10 +47,12 @@ public class DepositStatusUpdater {
             Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, true, record.get().getStorageInBytes());
             dpObject.ifPresent(depositPropertiesDAO::merge);
             log.debug("onDepositCreate - The deposit '{}' location and/or state has been updated to '{}' ", record.get().getDepositId(), depositPropertiesFile.getParentFile().getAbsolutePath());
-        } else {
+        }
+        else {
             Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, false, 0);
             dpObject.ifPresent(depositPropertiesDAO::save);
-            log.debug("onDepositCreate: A new deposit has been registered '{}'", depositPropertiesFile.getParentFile().getAbsolutePath());//log.info("onCreateDeposit: A new deposit has been registered `{}`", depositPropertiesFile.getParentFile().getAbsolutePath());
+            log.debug("onDepositCreate: A new deposit has been registered '{}'",
+                depositPropertiesFile.getParentFile().getAbsolutePath());//log.info("onCreateDeposit: A new deposit has been registered `{}`", depositPropertiesFile.getParentFile().getAbsolutePath());
         }
     }
 
@@ -70,14 +72,16 @@ public class DepositStatusUpdater {
 
         // The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Ignore delete step
         if (record.isPresent()) {
-            log.debug("OnDepositDelete: \n record.getLocation(): {} \n deposit-path-argument: {}\n depositPropertiesFile.exists() : {}\n", record.get().getLocation(), depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), depositPropertiesFile.exists());
+            log.debug("OnDepositDelete: \n record.getLocation(): {} \n deposit-path-argument: {}\n depositPropertiesFile.exists() : {}\n", record.get().getLocation(),
+                depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), depositPropertiesFile.exists());
             try {
                 if (Files.isSameFile(Path.of(record.get().getLocation()), Path.of(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath())) && !depositPropertiesFile.exists()) {
                     String depositId = depositPropertiesFile.getParentFile().getName();
                     Optional<Integer> deletedNumber = depositPropertiesDAO.updateDeleteFlag(depositId, true);
                     log.debug("onDepositDelete - 'deleted' mark has been set to '{}' for deposit.properties from '{}' ", deletedNumber.isPresent() && deletedNumber.get() > 0, depositId);
                 }
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
