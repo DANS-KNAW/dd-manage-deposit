@@ -66,7 +66,10 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
         assertThat(formattedMessage).endsWith("DepositStatusUpdaterOnDepositUpdateTest/bag'");
 
         // Check the database
-        assertThat(dao.findById("bag")).isNotEmpty().get()
+        var maybyDepositProperties = daoTestExtension.inTransaction(() -> 
+            dao.findById("bag")
+        );
+        assertThat(maybeDepositProperties).isNotEmpty().get()
             .hasFieldOrPropertyWithValue("depositId", "bag")
             .hasFieldOrPropertyWithValue("depositor", "user001")
             .hasFieldOrPropertyWithValue("bagName", "revision03")
@@ -75,7 +78,10 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
             .hasFieldOrPropertyWithValue("location", testDir.toAbsolutePath().toString())
             .hasFieldOrPropertyWithValue("storageInBytes", 113L);
 
-        assertThat(dao.findAll()).isNotEmpty();
+        var depositPropertiesList = daoTestExtension.inTransaction(() -> 
+            dao.findAll()
+        );
+        assertThat(depositPropertiesList).hasSize(1);
     }
 
     // TODO: other scenario's and test classes for onChangeDeposit and onDeleteDeposit
