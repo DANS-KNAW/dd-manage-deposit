@@ -36,6 +36,7 @@ public class DepthFileFilter extends AbstractFileFilter {
         var path = file.getAbsoluteFile().toPath();
         if (!path.startsWith(absoluteBaseFolder)) {
             log.warn(String.format("[%s] must be a child of [%s]", path, absoluteBaseFolder));
+            return false;
         }
         return path.getNameCount() == requiredNameCount;
     }
