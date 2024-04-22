@@ -106,43 +106,44 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
             Predicate orPredicateItem;
             List<Predicate> orPredicatesList = new ArrayList<>();
             for (String value : values) {
-                switch (parameter) {
-                    case "depositid":
-                        orPredicateItem = criteriaBuilder.equal(root.get("depositId"), value);
-                        break;
+                if (!value.isEmpty()) {
+                    switch (parameter) {
+                        case "depositid":
+                            orPredicateItem = criteriaBuilder.equal(root.get("depositId"), value);
+                            break;
 
-                    case "user":
-                        orPredicateItem = criteriaBuilder.equal(root.get("depositor"), value);
-                        break;
+                        case "user":
+                            orPredicateItem = criteriaBuilder.equal(root.get("depositor"), value);
+                            break;
 
-                    case "deleted":
-                        if (Boolean.parseBoolean(value))
-                            orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
-                        else
-                            orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
-                        break;
+                        case "deleted":
+                            if (Boolean.parseBoolean(value))
+                                orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
+                            else
+                                orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
+                            break;
 
-                    case "state":
-                        orPredicateItem = criteriaBuilder.equal(root.get("depositState"), value);
-                        break;
+                        case "state":
+                            orPredicateItem = criteriaBuilder.equal(root.get("depositState"), value);
+                            break;
 
-                    case "startdate":
-                    case "enddate":
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        LocalDate date = LocalDate.parse(value, formatter);
-                        var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
+                        case "startdate":
+                        case "enddate":
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            LocalDate date = LocalDate.parse(value, formatter);
+                            var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
-                        if (parameter.equals("startdate"))
-                            orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
-                        else
-                            orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
-                        break;
+                            if (parameter.equals("startdate"))
+                                orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
+                            else
+                                orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
+                            break;
 
-                    default:
-                        orPredicateItem = criteriaBuilder.equal(root.get(key), value);
+                        default:
+                            orPredicateItem = criteriaBuilder.equal(root.get(key), value);
+                    }
+                    orPredicatesList.add(orPredicateItem);
                 }
-
-                orPredicatesList.add(orPredicateItem);
             }
 
             orPredicateItem = criteriaBuilder.or(orPredicatesList.toArray(new Predicate[0]));

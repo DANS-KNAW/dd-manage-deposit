@@ -48,7 +48,7 @@ class DepositPropertiesAssembler {
                 configuration.getString("bag-store.bag-name", ""),
                 configuration.getString("state.label", ""),
                 TextTruncation.stripEnd(configuration.getString("state.description", ""), TextTruncation.MAX_DESCRIPTION_LENGTH),
-                OffsetDateTime.parse(configuration.getString("creation.timestamp", OffsetDateTime.now().toString())),
+                OffsetDateTime.parse(configuration.getString("creation.timestamp", "")),
                 TextTruncation.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), TextTruncation.MAX_DIRECTORY_LENGTH),
                 CalculatedFolderSize == 0 ? calculateFolderSize(depositPath) : CalculatedFolderSize);
 
