@@ -16,9 +16,8 @@
 package nl.knaw.dans.managedeposit.core.service;
 
 public class TextTruncation {
-    public static final long pollingInterval = 5 * 1000;
-    public static final int maxDescriptionLength = 1024;
-    public static final int maxDirectoryLength = 512;
+    public static final int MAX_DESCRIPTION_LENGTH = 1024;
+    public static final int MAX_DIRECTORY_LENGTH = 512;
 
     public static String stripEnd(String text, int maxLength) {
         return text.length() > maxLength ? text.substring(0, maxLength) : text;
@@ -28,6 +27,5 @@ public class TextTruncation {
         int textLength = text.length();
         return textLength > maxLength ? text.substring(textLength - maxLength) : text;
     }
-
 
 }

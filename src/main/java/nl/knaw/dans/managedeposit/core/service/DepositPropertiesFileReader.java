@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 class DepositPropertiesFileReader {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesAssembler.class);
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesFileReader.class);
 
     static public Configuration readDepositProperties(File propertiesFile) throws ConfigurationException {
         log.debug("readDepositProperties: '{}'", propertiesFile.toString());

@@ -40,24 +40,24 @@ public class DepositPropertiesResource {
 
     private String writeHelpInfoText() {
         return
-            "DD Manage Deposit is running. \n" +
-            "Usage: \n" +
-            "  - Create reports: GET  basePath/report \n" +
-            "  - Clean database: POST basePath/delete-deposit \n" +
-            "    Query string parameters: user, state, startdate, enddate \n" +
-            "    'startdate'/'enddate' format: yyyy-MM-dd \n" +
-            "    Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED \n" +
-            "  Examples: \n" +
-            "    curl -i -X GET  basePath/report?startdate=yyyy-MM-dd \n" +
-            "    curl -i -X GET basePath/delete-deposit?user=XXX&state=REJECTED \n" +
-            "    curl -i -X POST basePath/delete-deposit?user=XXX \n" +
-            "    curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED";
+            """
+                DD Manage Deposit is running.\s
+                Usage:\s
+                  - Create reports: GET  basePath/report\s
+                  - Clean database: POST basePath/delete-deposit\s
+                    Query string parameters: user, state, startdate, enddate\s
+                    'startdate'/'enddate' format: yyyy-MM-dd\s
+                    Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
+                  Examples:\s
+                    curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
+                    curl -i -X GET  basePath/delete-deposit?user=XXX&state=REJECTED\s
+                    curl -i -X POST basePath/delete-deposit?user=XXX\s
+                    curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED""";
     }
 
     @GET
     @UnitOfWork
     public Response getApiInformation() {
-
 
         return Response
             .status(Response.Status.OK)
