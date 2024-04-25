@@ -47,7 +47,7 @@ public class DepositPropertiesResource {
                   - Clean database: POST basePath/delete-deposit\s
                   - Query string parameters: user, state, startdate, enddate, deleted\s
                     - 'startdate'/'enddate' format: yyyy-MM-dd\s
-                    - 'deleted' is a boolean with values: 'true' or 'false'
+                    - 'deleted' is a boolean with values: 'true' or 'false'\s
                     - Possible 'state' values: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
                     - To give an undefined parameter (when column's value is empty or null): 'parameterName=' (ex. 'user=')\s
                   Examples:\s

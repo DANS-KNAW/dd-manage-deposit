@@ -36,7 +36,6 @@ class DepositPropertiesAssembler {
     }
 
     Optional<DepositProperties> assembleObject(File depositPropertiesFile, long CalculatedFolderSize) {
-
         Path depositPath = depositPropertiesFile.getParentFile().toPath();
         log.debug("assembleObject(depositPropertiesPath:Path): '{}'", depositPropertiesFile.getAbsolutePath());
         DepositProperties dp = null;

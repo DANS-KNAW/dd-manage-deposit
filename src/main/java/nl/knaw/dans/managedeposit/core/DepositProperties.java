@@ -83,6 +83,10 @@ public class DepositProperties {
         return depositId;
     }
 
+    public String getDepositId() {
+        return depositId;
+    }
+
     public String getDepositor() {
         return depositor;
     }

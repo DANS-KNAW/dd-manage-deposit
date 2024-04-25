@@ -132,7 +132,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
                     case "startdate":
                     case "enddate":
-                        //var dct = root.get("depositCreationTimestamp");
                         if (value.isEmpty()) {
                             orPredicateItem = criteriaBuilder.isNull(root.get("depositCreationTimestamp"));
                         }
