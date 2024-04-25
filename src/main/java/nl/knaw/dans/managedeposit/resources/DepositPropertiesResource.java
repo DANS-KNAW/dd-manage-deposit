@@ -45,9 +45,11 @@ public class DepositPropertiesResource {
                 Usage:\s
                   - Create reports: GET  basePath/report\s
                   - Clean database: POST basePath/delete-deposit\s
-                    Query string parameters: user, state, startdate, enddate\s
-                    'startdate'/'enddate' format: yyyy-MM-dd\s
-                    Possible 'state' value: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
+                  - Query string parameters: user, state, startdate, enddate, deleted\s
+                    - 'startdate'/'enddate' format: yyyy-MM-dd\s
+                    - 'deleted' is a boolean with values: 'true' or 'false'
+                    - Possible 'state' values: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
+                    - To give an undefined parameter (when column's value is empty or null): 'parameterName=' (ex. 'user=')\s
                   Examples:\s
                     curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
                     curl -i -X GET  basePath/delete-deposit?user=XXX&state=REJECTED\s

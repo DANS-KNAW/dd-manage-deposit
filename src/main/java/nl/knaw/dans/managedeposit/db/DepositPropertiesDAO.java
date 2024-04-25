@@ -19,6 +19,8 @@ import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -26,6 +28,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -37,6 +40,7 @@ import java.util.Optional;
 
 @SuppressWarnings("resource")
 public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDAO.class);
 
     public DepositPropertiesDAO(SessionFactory sessionFactory) {
         super(sessionFactory);
@@ -106,44 +110,54 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
             Predicate orPredicateItem;
             List<Predicate> orPredicatesList = new ArrayList<>();
             for (String value : values) {
-                if (!value.isEmpty()) {
-                    switch (parameter) {
-                        case "depositid":
-                            orPredicateItem = criteriaBuilder.equal(root.get("depositId"), value);
-                            break;
+                switch (parameter) {
+                    case "depositid":
+                        orPredicateItem = criteriaBuilder.equal(root.get("depositId"), value);
+                        break;
 
-                        case "user":
-                            orPredicateItem = criteriaBuilder.equal(root.get("depositor"), value);
-                            break;
+                    case "user":
+                        orPredicateItem = criteriaBuilder.equal(root.get("depositor"), value);
+                        break;
 
-                        case "deleted":
-                            if (Boolean.parseBoolean(value))
-                                orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
-                            else
-                                orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
-                            break;
+                    case "deleted":
+                        if (Boolean.parseBoolean(value))
+                            orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
+                        else
+                            orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
+                        break;
 
-                        case "state":
-                            orPredicateItem = criteriaBuilder.equal(root.get("depositState"), value);
-                            break;
+                    case "state":
+                        orPredicateItem = criteriaBuilder.equal(root.get("depositState"), value);
+                        break;
 
-                        case "startdate":
-                        case "enddate":
-                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                            LocalDate date = LocalDate.parse(value, formatter);
-                            var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
+                    case "startdate":
+                    case "enddate":
+                        //var dct = root.get("depositCreationTimestamp");
+                        if (value.isEmpty()) {
+                            orPredicateItem = criteriaBuilder.isNull(root.get("depositCreationTimestamp"));
+                        }
+                        else {
+                            try {
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                LocalDate date = LocalDate.parse(value, formatter);
+                                var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
-                            if (parameter.equals("startdate"))
-                                orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
-                            else
-                                orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
-                            break;
+                                if (parameter.equals("startdate"))
+                                    orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
+                                else
+                                    orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
+                            }
+                            catch (DateTimeException e) {
+                                log.warn("Error parsing the date: {}", e.getMessage());
+                                continue;
+                            }
+                        }
+                        break;
 
-                        default:
-                            orPredicateItem = criteriaBuilder.equal(root.get(key), value);
-                    }
-                    orPredicatesList.add(orPredicateItem);
+                    default:
+                        orPredicateItem = criteriaBuilder.equal(root.get(key), value);
                 }
+                orPredicatesList.add(orPredicateItem);
             }
 
             orPredicateItem = criteriaBuilder.or(orPredicatesList.toArray(new Predicate[0]));

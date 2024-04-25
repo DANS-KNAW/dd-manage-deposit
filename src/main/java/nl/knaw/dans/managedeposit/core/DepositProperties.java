@@ -67,7 +67,7 @@ public class DepositProperties {
     }
 
     public DepositProperties(String depositId, String depositor, String bagName, String depositState,
-        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
+        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes, OffsetDateTime depositUpdateTimestamp) {
         this.depositId = depositId;
         this.depositor = depositor;
         this.bagName = bagName;
@@ -76,6 +76,7 @@ public class DepositProperties {
         this.depositCreationTimestamp = depositCreationTimestamp;
         this.location = location;
         this.storageInBytes = storageInBytes;
+        this.depositUpdateTimestamp = depositUpdateTimestamp;
     }
 
     public String getDepositId() {
@@ -171,5 +172,21 @@ public class DepositProperties {
     @Override
     public int hashCode() {
         return 31 * depositId.hashCode() + depositor.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "DepositProperties{" +
+            "depositor='" + depositor + '\'' +
+            ", depositId='" + depositId + '\'' +
+            ", bagName='" + bagName + '\'' +
+            ", depositState='" + depositState + '\'' +
+            ", depositCreationTimestamp=" + depositCreationTimestamp +
+            ", depositUpdateTimestamp=" + depositUpdateTimestamp +
+            ", description='" + description + '\'' +
+            ", location='" + location + '\'' +
+            ", storageInBytes=" + storageInBytes +
+            ", deleted=" + deleted +
+            '}';
     }
 }
