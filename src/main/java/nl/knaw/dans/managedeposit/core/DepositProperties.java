@@ -177,7 +177,7 @@ public class DepositProperties {
     @Override
     public String toString() {
         return "DepositProperties{" +
-            "depositor='" + depositor + '\'' +
+            "depositor='" + depositor + "'" +
             ", depositId='" + depositId + '\'' +
             ", bagName='" + bagName + '\'' +
             ", depositState='" + depositState + '\'' +
