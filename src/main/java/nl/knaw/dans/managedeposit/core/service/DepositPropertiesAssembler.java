@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.DateTimeException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -34,37 +35,32 @@ class DepositPropertiesAssembler {
     DepositPropertiesAssembler() {
     }
 
-    Optional<DepositProperties> assembleObject(File depositPropertiesFile, boolean updateModificationDateTime, long CalculatedFolderSize) {
-
+    Optional<DepositProperties> assembleObject(File depositPropertiesFile, long CalculatedFolderSize) {
         Path depositPath = depositPropertiesFile.getParentFile().toPath();
         log.debug("assembleObject(depositPropertiesPath:Path): '{}'", depositPropertiesFile.getAbsolutePath());
-        DepositProperties dp; // = null
+        DepositProperties dp = null;
         Configuration configuration;
         try {
             configuration = DepositPropertiesFileReader.readDepositProperties(depositPropertiesFile);
+            String creationTime = configuration.getString("creation.timestamp");
 
             dp = new DepositProperties(depositPath.getFileName().toString(),
                 configuration.getString("depositor.userId", ""),
                 configuration.getString("bag-store.bag-name", ""),
                 configuration.getString("state.label", ""),
                 TextTruncation.stripEnd(configuration.getString("state.description", ""), TextTruncation.MAX_DESCRIPTION_LENGTH),
-                OffsetDateTime.parse(configuration.getString("creation.timestamp", "")),
+                (creationTime == null || creationTime.isEmpty()) ? null : OffsetDateTime.parse(creationTime),
                 TextTruncation.stripBegin(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), TextTruncation.MAX_DIRECTORY_LENGTH),
-                CalculatedFolderSize == 0 ? calculateFolderSize(depositPath) : CalculatedFolderSize);
-
-            if (updateModificationDateTime) {
-                dp.setDepositUpdateTimestamp(OffsetDateTime.now());
-            }
-            else {
-                dp.setDepositUpdateTimestamp(dp.getDepositCreationTimestamp());
-            }
-
+                CalculatedFolderSize == 0 ? calculateFolderSize(depositPath) : CalculatedFolderSize,
+                OffsetDateTime.now());
         }
-        catch (ConfigurationException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+        catch (ConfigurationException | DateTimeException e) {
+            log.error("Error reading deposit.properties file: {}", e.getMessage());
         }
-        return Optional.of(dp);
+        catch (RuntimeException e) {
+            log.error("Error accessing deposit files : {}", e.getMessage());
+        }
+        return Optional.ofNullable(dp);
     }
 
     private long calculateFolderSize(Path path) {

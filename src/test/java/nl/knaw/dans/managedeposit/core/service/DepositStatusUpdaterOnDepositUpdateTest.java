@@ -66,7 +66,7 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
         assertThat(formattedMessage).endsWith("DepositStatusUpdaterOnDepositUpdateTest/bag'");
 
         // Check the database
-        var maybeDepositProperties = daoTestExtension.inTransaction(() -> 
+        var maybeDepositProperties = daoTestExtension.inTransaction(() ->
             dao.findById("bag")
         );
         assertThat(maybeDepositProperties).isNotEmpty().get()
@@ -78,10 +78,87 @@ public class DepositStatusUpdaterOnDepositUpdateTest extends AbstractDatabaseTes
             .hasFieldOrPropertyWithValue("location", testDir.toAbsolutePath().toString())
             .hasFieldOrPropertyWithValue("storageInBytes", 113L);
 
-        var depositPropertiesList = daoTestExtension.inTransaction(() -> 
+        var depositPropertiesList = daoTestExtension.inTransaction(() ->
             dao.findAll()
         );
         assertThat(depositPropertiesList).hasSize(1);
+    }
+
+    @Test
+    public void onCreateDeposit_should_create_new_db_record_when_creation_timestamp_is_empty() throws IOException {
+        var depositStatusUpdater = new DepositStatusUpdater(dao);
+
+        // Prepare test data
+        var propertiesFile = testDir.resolve("bag/deposit.properties");
+        createDirectories(propertiesFile.getParent());
+        Files.writeString(propertiesFile, """
+            creation.timestamp
+            depositor.userId = user001
+            bag-store.bag-name = revision03
+            """);
+
+        // Call the method under test
+        depositStatusUpdater.onDepositCreate(propertiesFile.toFile());
+
+        // Check the logs
+        var formattedMessage = listAppender.list.get(0).getFormattedMessage();
+        assertThat(formattedMessage).startsWith("onDepositCreate: A new deposit has been registered '");
+        assertThat(formattedMessage).endsWith("DepositStatusUpdaterOnDepositUpdateTest/bag'");
+
+        // Check the database
+        var maybeDepositProperties = daoTestExtension.inTransaction(() -> dao.findById("bag"));
+        assertThat(maybeDepositProperties).isNotEmpty();
+    }
+
+    @Test
+    public void onCreateDeposit_should_create_new_db_record_when_creation_timestamp_is_not_present() throws IOException {
+        var depositStatusUpdater = new DepositStatusUpdater(dao);
+
+        // Prepare test data
+        var propertiesFile = testDir.resolve("bag/deposit.properties");
+        createDirectories(propertiesFile.getParent());
+        Files.writeString(propertiesFile, """
+            depositor.userId = user001
+            bag-store.bag-name = revision03
+            """);
+
+        // Call the method under test
+        depositStatusUpdater.onDepositCreate(propertiesFile.toFile());
+
+        // Check the logs
+        var formattedMessage = listAppender.list.get(0).getFormattedMessage();
+        assertThat(formattedMessage).startsWith("onDepositCreate: A new deposit has been registered '");
+        assertThat(formattedMessage).endsWith("DepositStatusUpdaterOnDepositUpdateTest/bag'");
+
+        // Check the database
+        var maybeDepositProperties = daoTestExtension.inTransaction(() -> dao.findById("bag"));
+        assertThat(maybeDepositProperties).isNotEmpty();
+    }
+
+    @Test
+    public void onCreateDeposit_should_not_create_new_db_record_when_creation_timestamp_is_invalid() throws IOException {
+        var depositStatusUpdater = new DepositStatusUpdater(dao);
+
+        // Prepare test data
+        var propertiesFile = testDir.resolve("bag/deposit.properties");
+        createDirectories(propertiesFile.getParent());
+        Files.writeString(propertiesFile, """
+            creation.timestamp = 2023-08-16 17:40:41.390209+02:00
+            depositor.userId = user001
+            bag-store.bag-name = revision03
+            """);
+
+        // Call the method under test
+        depositStatusUpdater.onDepositCreate(propertiesFile.toFile());
+
+        // Check the logs
+        var formattedMessage = listAppender.list.get(0).getFormattedMessage();
+        assertThat(formattedMessage).startsWith("Error creating / Updating deposit record: '");
+        assertThat(formattedMessage).endsWith("DepositStatusUpdaterOnDepositUpdateTest/bag'");
+
+        // Check the database
+        var maybeDepositProperties = daoTestExtension.inTransaction(() -> dao.findById("bag"));
+        assertThat(maybeDepositProperties).isEmpty();
     }
 
     // TODO: other scenario's and test classes for onChangeDeposit and onDeleteDeposit

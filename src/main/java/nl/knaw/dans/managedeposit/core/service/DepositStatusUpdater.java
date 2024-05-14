@@ -44,25 +44,39 @@ public class DepositStatusUpdater {
 
         if (record.isPresent()) {
             // Update the location column and other fields
-            Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, true, record.get().getStorageInBytes());
-            dpObject.ifPresent(depositPropertiesDAO::merge);
-            log.debug("onDepositCreate - The deposit '{}' location and/or state has been updated to '{}' ", record.get().getDepositId(), depositPropertiesFile.getParentFile().getAbsolutePath());
+            Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, record.get().getStorageInBytes());
+            if (dpObject.isPresent()) {
+                depositPropertiesDAO.merge(dpObject.get());
+                log.debug("onDepositCreate - The deposit '{}' location and/or state has been updated to '{}' ", record.get().getDepositId(), depositPropertiesFile.getParentFile().getAbsolutePath());
+            }
+            else {
+                writeErrorMsg(depositPropertiesFile.getParentFile().getAbsolutePath());
+            }
         }
         else {
-            Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, false, 0);
-            dpObject.ifPresent(depositPropertiesDAO::save);
-            log.debug("onDepositCreate: A new deposit has been registered '{}'",
-                depositPropertiesFile.getParentFile().getAbsolutePath());//log.info("onCreateDeposit: A new deposit has been registered `{}`", depositPropertiesFile.getParentFile().getAbsolutePath());
+            Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, 0);
+            if (dpObject.isPresent()) {
+                depositPropertiesDAO.save(dpObject.get());
+                log.debug("onDepositCreate: A new deposit has been registered '{}'", depositPropertiesFile.getParentFile().getAbsolutePath());
+            }
+            else {
+                writeErrorMsg(depositPropertiesFile.getParentFile().getAbsolutePath());
+            }
         }
     }
 
     @UnitOfWork
     public void onDepositChange(File depositPropertiesFile) {
         Optional<DepositProperties> record = depositPropertiesDAO.findById(depositPropertiesFile.getParentFile().getName());
-        long folder_size = record.isPresent() ? record.get().getStorageInBytes() : 0;
-        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, true, folder_size);
-        dpObject.ifPresent(depositPropertiesDAO::merge);
-        log.debug("onDepositChange: deposit.properties has been changed '{}'", depositPropertiesFile.getParentFile().getAbsolutePath());
+        long folder_size = record.map(DepositProperties::getStorageInBytes).orElse(0L);
+        Optional<DepositProperties> dpObject = depositPropertiesAssembler.assembleObject(depositPropertiesFile, folder_size);
+        if (dpObject.isPresent()) {
+            depositPropertiesDAO.merge(dpObject.get());
+            log.debug("onDepositChange: deposit.properties has been changed '{}'", depositPropertiesFile.getParentFile().getAbsolutePath());
+        }
+        else {
+            writeErrorMsg(depositPropertiesFile.getParentFile().getAbsolutePath());
+        }
     }
 
     @UnitOfWork
@@ -72,8 +86,6 @@ public class DepositStatusUpdater {
 
         // The 'move deposit' action is processed in two steps: 1. `create` deposit in the new location; 2. `delete` it from the old location. Ignore delete step
         if (record.isPresent()) {
-            log.debug("OnDepositDelete: \n record.getLocation(): {} \n deposit-path-argument: {}\n depositPropertiesFile.exists() : {}\n", record.get().getLocation(),
-                depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath(), depositPropertiesFile.exists());
             try {
                 if (Files.isSameFile(Path.of(record.get().getLocation()), Path.of(depositPropertiesFile.getParentFile().getParentFile().getAbsolutePath())) && !depositPropertiesFile.exists()) {
                     String depositId = depositPropertiesFile.getParentFile().getName();
@@ -82,9 +94,13 @@ public class DepositStatusUpdater {
                 }
             }
             catch (IOException e) {
-                throw new RuntimeException(e);
+                writeErrorMsg(e.getMessage());
             }
         }
+    }
+
+    private void writeErrorMsg(String additionalInfo) {
+        log.error("Error creating / Updating deposit record: '{}'", additionalInfo);
     }
 
 }
