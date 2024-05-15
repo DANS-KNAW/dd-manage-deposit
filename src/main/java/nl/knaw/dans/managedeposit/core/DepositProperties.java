@@ -30,6 +30,8 @@ import java.time.OffsetDateTime;
     name = "showAll",
     query = "SELECT dp FROM DepositProperties dp"
 )
+
+@SuppressWarnings("unused")
 public class DepositProperties {
 
     @Column(name = "depositor", nullable = false)                          // depositor.userId
@@ -49,10 +51,10 @@ public class DepositProperties {
     @Column(name = "deposit_update_timestamp")                             // modified timestamp of deposit.properties
     private OffsetDateTime depositUpdateTimestamp;
 
-    @Column(name = "description", length = TextTruncation.maxDescriptionLength)   // state.description
+    @Column(name = "description", length = TextTruncation.MAX_DESCRIPTION_LENGTH)   // state.description
     private String description;
 
-    @Column(name = "location", length = TextTruncation.maxDirectoryLength)        // full parent-path on disk
+    @Column(name = "location", length = TextTruncation.MAX_DIRECTORY_LENGTH)        // full parent-path on disk
     private String location;
 
     @Column(name = "storage_in_bytes")                                     // Total storage of deposit directory
@@ -60,15 +62,12 @@ public class DepositProperties {
 
     @Column(name = "deleted")                                              // deposit is deleted from inbox - archived
     private boolean deleted;
-    public String getDepositId() {
-        return depositId;
-    }
 
     public DepositProperties() {
     }
 
     public DepositProperties(String depositId, String depositor, String bagName, String depositState,
-        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes) {
+        String description, OffsetDateTime depositCreationTimestamp, String location, long storageInBytes, OffsetDateTime depositUpdateTimestamp) {
         this.depositId = depositId;
         this.depositor = depositor;
         this.bagName = bagName;
@@ -77,6 +76,11 @@ public class DepositProperties {
         this.depositCreationTimestamp = depositCreationTimestamp;
         this.location = location;
         this.storageInBytes = storageInBytes;
+        this.depositUpdateTimestamp = depositUpdateTimestamp;
+    }
+
+    public String getDepositId() {
+        return depositId;
     }
 
     public String getDepositor() {
@@ -168,5 +172,21 @@ public class DepositProperties {
     @Override
     public int hashCode() {
         return 31 * depositId.hashCode() + depositor.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "DepositProperties{" +
+            "depositor='" + depositor + "'" +
+            ", depositId='" + depositId + '\'' +
+            ", bagName='" + bagName + '\'' +
+            ", depositState='" + depositState + '\'' +
+            ", depositCreationTimestamp=" + depositCreationTimestamp +
+            ", depositUpdateTimestamp=" + depositUpdateTimestamp +
+            ", description='" + description + '\'' +
+            ", location='" + location + '\'' +
+            ", storageInBytes=" + storageInBytes +
+            ", deleted=" + deleted +
+            '}';
     }
 }

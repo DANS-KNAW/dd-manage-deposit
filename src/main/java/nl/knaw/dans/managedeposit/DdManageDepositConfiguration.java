@@ -18,7 +18,6 @@ package nl.knaw.dans.managedeposit;
 
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import nl.knaw.dans.managedeposit.core.service.TextTruncation;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -26,7 +25,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class DdManageDepositConfiguration extends Configuration {
+    private static final long DEFAULT_POLLING_INTERVAL = 500;
     @Valid
     @NotNull
     private DataSourceFactory database = new DataSourceFactory();
@@ -52,7 +53,7 @@ public class DdManageDepositConfiguration extends Configuration {
     }
 
     public long getPollingInterval() {
-        return pollingInterval > 0 ? pollingInterval : TextTruncation.pollingInterval;
+        return pollingInterval > 0 ? pollingInterval : DEFAULT_POLLING_INTERVAL;
     }
 
     public void setPollingInterval(long pollingInterval) {

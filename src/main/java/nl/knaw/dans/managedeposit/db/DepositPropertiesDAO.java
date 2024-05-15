@@ -19,6 +19,8 @@ import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -26,7 +28,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.nio.file.Path;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -38,6 +40,7 @@ import java.util.Optional;
 
 @SuppressWarnings("resource")
 public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDAO.class);
 
     public DepositPropertiesDAO(SessionFactory sessionFactory) {
         super(sessionFactory);
@@ -70,7 +73,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
     public List<DepositProperties> findSelection(Map<String, List<String>> queryParameters) {
         CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
 
-        if (queryParameters.size() == 0)
+        if (queryParameters.isEmpty())
             return findAll();
 
         CriteriaQuery<DepositProperties> criteriaQuery = criteriaBuilder.createQuery(DepositProperties.class);
@@ -83,7 +86,7 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
         var criteriaBuilder = currentSession().getCriteriaBuilder();
-        if (queryParameters.size() == 0)                   // Note: all records will be deleted (accidentally) without any specified query parameter
+        if (queryParameters.isEmpty())                   // Note: all records will be deleted (accidentally) without any specified query parameter
             return Optional.of(0);
 
         CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
@@ -129,20 +132,30 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
                     case "startdate":
                     case "enddate":
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        LocalDate date = LocalDate.parse(value, formatter);
-                        var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
+                        if (value.isEmpty()) {
+                            orPredicateItem = criteriaBuilder.isNull(root.get("depositCreationTimestamp"));
+                        }
+                        else {
+                            try {
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                LocalDate date = LocalDate.parse(value, formatter);
+                                var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
-                        if (parameter.equals("startdate"))
-                            orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
-                        else
-                            orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
+                                if (parameter.equals("startdate"))
+                                    orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
+                                else
+                                    orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
+                            }
+                            catch (DateTimeException e) {
+                                log.warn("Error parsing the date: {}", e.getMessage());
+                                continue;
+                            }
+                        }
                         break;
 
                     default:
                         orPredicateItem = criteriaBuilder.equal(root.get(key), value);
                 }
-
                 orPredicatesList.add(orPredicateItem);
             }
 
@@ -164,20 +177,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         criteriaUpdate.where(predicate);
 
         criteriaUpdate.set("deleted", deleted);
-
-        var query = currentSession().createQuery(criteriaUpdate);
-        return Optional.of(query.executeUpdate());
-    }
-
-    public Optional<Integer> updateDepositLocation(String depositId, Path currentParentPath) {
-        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
-        CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
-        Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
-
-        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
-        criteriaUpdate.where(predicate);
-
-        criteriaUpdate.set("location", currentParentPath.toString());
 
         var query = currentSession().createQuery(criteriaUpdate);
         return Optional.of(query.executeUpdate());

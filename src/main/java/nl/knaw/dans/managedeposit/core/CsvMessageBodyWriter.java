@@ -45,14 +45,16 @@ public class CsvMessageBodyWriter implements MessageBodyWriter<List<DepositPrope
     @Override
     public void writeTo(List data, Class aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap multivaluedMap, OutputStream outputStream) throws
         IOException, WebApplicationException {
-        if (data != null && data.size() > 0) {
+        if (data != null && !data.isEmpty()) {
             // TODO: pass the mapper in at configuration time
             CsvMapper mapper = new CsvMapper();
             Object o = data.get(0);
             CsvSchema schema = mapper.schemaFor(o.getClass())
                 .withHeader()
                 .sortedBy("depositor", "depositId", "bagName", "depositState", "depositCreationTimestamp", "depositUpdateTimestamp", "description", "location", "storageInBytes", "deleted")
-                    .rebuild().build();
+                .rebuild()
+                .setNullValue("undefined")
+                .build();
 
             mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             mapper.registerModule(new JavaTimeModule());
