@@ -5,7 +5,7 @@ Description=Dd Manage Deposit Service
 ExecStart=/opt/dans.knaw.nl/dd-manage-deposit/bin/dd-manage-deposit server /etc/opt/dans.knaw.nl/dd-manage-deposit/config.yml
 # Java returns 143 even if the SIGTERM was handled correctly.
 SuccessExitStatus=143
-Environment="INITIAL_HEAP_SIZE=-Xms64m"
+Environment="JAVA_OPTS=-Xms64m"
 Environment="LC_ALL=en_US.UTF-8"
 
 User=dd-manage-deposit
