@@ -42,12 +42,14 @@ public class InboxHealthCheck extends HealthCheck {
 
             if (exists && canRead) {
                 log.debug("Inbox path '{}' exists and is readable", folder);
-            } else {
+            }
+            else {
                 valid = false;
 
                 if (!exists) {
                     log.debug("Inbox path '{}' does not exist", folder);
-                } else {
+                }
+                else {
                     log.debug("Inbox path '{}' is not readable", folder);
                 }
             }
@@ -55,7 +57,8 @@ public class InboxHealthCheck extends HealthCheck {
 
         if (valid) {
             return Result.healthy();
-        } else {
+        }
+        else {
             return Result.unhealthy("InboxPaths are not accessible");
         }
     }

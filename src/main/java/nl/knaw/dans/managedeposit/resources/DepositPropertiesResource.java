@@ -52,7 +52,8 @@ public class DepositPropertiesResource {
                     - To give an undefined parameter (when column's value is empty or null): 'parameterName=' (ex. 'user=')\s
                   Examples:\s
                     curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
-                    curl -i -X GET  basePath/delete-deposit?user=XXX&state=REJECTED\s
+                    curl -i -X GET  basePath/report?user=XXX&state=REJECTED\s
+                    curl -i -X GET  basePath/report/{depositId}\s
                     curl -i -X POST basePath/delete-deposit?user=XXX\s
                     curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED""";
     }

@@ -17,6 +17,7 @@ package nl.knaw.dans.managedeposit.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
+import nl.knaw.dans.managedeposit.core.service.InvalidRequestParameterException;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -86,8 +87,9 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
         var criteriaBuilder = currentSession().getCriteriaBuilder();
-        if (queryParameters.isEmpty())                   // Note: all records will be deleted (accidentally) without any specified query parameter
-            return Optional.of(0);
+        if (queryParameters.isEmpty()) {
+            throw new InvalidRequestParameterException("Delete command without argument would make database empty. It is not accepted.");
+        }
 
         CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
         Root<DepositProperties> root = deleteQuery.from(DepositProperties.class);
@@ -101,11 +103,15 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
 
     private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {
         List<Predicate> predicates = new ArrayList<>();
+        boolean startDateSpecifiedAlready = false, endDateSpecifiedAlready = false;
         Predicate predicate;
 
         for (String key : queryParameters.keySet()) {
             List<String> values = queryParameters.get(key);
             String parameter = key.toLowerCase();
+            if (values.isEmpty()) {
+                throw new InvalidRequestParameterException(String.format("Empty value of parameter %s", parameter));
+            }
             //javax.persistence.criteria
             Predicate orPredicateItem;
             List<Predicate> orPredicatesList = new ArrayList<>();
@@ -141,20 +147,29 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
                                 LocalDate date = LocalDate.parse(value, formatter);
                                 var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
 
-                                if (parameter.equals("startdate"))
+                                if (parameter.equals("startdate")) {
+                                    if (startDateSpecifiedAlready)
+                                        throw new InvalidRequestParameterException(String.format("Duplicated startdate parameter %s = %s ", parameter, value));
                                     orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
-                                else
+                                    startDateSpecifiedAlready = true;
+                                }
+                                else {
+                                    if (endDateSpecifiedAlready)
+                                        throw new InvalidRequestParameterException(String.format("Duplicated enddate parameter %s = %s ", parameter, value));
                                     orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
+                                    endDateSpecifiedAlready = true;
+                                }
                             }
                             catch (DateTimeException e) {
-                                log.warn("Error parsing the date: {}", e.getMessage());
-                                continue;
+                                log.error("Invalid or incorrectly formatted date parameter {}", e.getMessage());
+                                String error = String.format("Invalid or incorrectly formatted parameter %s = %s ", parameter, value);
+                                throw new InvalidRequestParameterException(String.format("Invalid or incorrectly formatted parameter %s = %s ", parameter, value));
                             }
                         }
                         break;
 
                     default:
-                        orPredicateItem = criteriaBuilder.equal(root.get(key), value);
+                        throw new InvalidRequestParameterException(String.format("Unknown parameter %s = %s ", parameter, value));
                 }
                 orPredicatesList.add(orPredicateItem);
             }

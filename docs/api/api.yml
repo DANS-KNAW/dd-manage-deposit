@@ -108,4 +108,4 @@ paths:
         '204':
           description: the deletion was carried out successfully
         '500':
-          description: the deletion could not be carred out
+          description: the deletion could not be carried out
