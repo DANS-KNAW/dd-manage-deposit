@@ -15,13 +15,13 @@
  */
 package nl.knaw.dans.managedeposit.core.service;
 
-public class InvalidTransferItemException extends Exception {
+public class InvalidRequestParameterException extends RuntimeException {
 
-    public InvalidTransferItemException(String msg, Throwable t) {
+    public InvalidRequestParameterException(String msg, Throwable t) {
         super(msg, t);
     }
 
-    public InvalidTransferItemException(String msg) {
+    public InvalidRequestParameterException(String msg) {
         this(msg, null);
     }
 }

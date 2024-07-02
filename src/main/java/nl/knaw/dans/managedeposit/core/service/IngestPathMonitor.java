@@ -80,7 +80,7 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
         }
         catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
-            throw new InvalidTransferItemException(e.getMessage());
+            throw new Exception(e);
         }
     }
 
@@ -100,8 +100,12 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
 
     @Override
     public void onFileCreate(File file) {
+        Path absolutePath = Path.of(file.getAbsolutePath());
         log.debug("onFileCreate: '{}'", file.getAbsolutePath());
-        depositStatusUpdater.onDepositCreate(file);
+        if (checkCleanBaseFolders(absolutePath))
+            depositStatusUpdater.onDepositCreate(file);
+        else
+            log.error("Error: file '{}' is directly in a base-folder.", file.getAbsolutePath());
     }
 
     @Override
@@ -114,6 +118,15 @@ public class IngestPathMonitor extends FileAlterationListenerAdaptor implements 
     public void onFileChange(File file) {
         log.debug("onFileChange: '{}'", file.getAbsolutePath());
         depositStatusUpdater.onDepositChange(file);
+    }
+
+    private boolean checkCleanBaseFolders(Path depositPropertiesFile) {
+        Path parent = depositPropertiesFile.getParent();
+        for (Path folder : toMonitorPaths) {
+            if (parent.endsWith(folder))
+                return false;
+        }
+        return true;
     }
 
 }
