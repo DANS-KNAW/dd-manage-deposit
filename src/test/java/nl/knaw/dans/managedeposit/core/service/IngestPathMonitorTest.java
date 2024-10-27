@@ -140,24 +140,6 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         monitor.stop();
     }
 
-    /*@Test
-    public void should_pick_up_deleted_root() throws Exception {
-        var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
-        var monitor = startMonitor(mockUpdater, 20);
-
-        var propertiesFile = testDir.resolve("bag/deposit.properties");
-        createDirectories(propertiesFile.getParent());
-        Files.createFile(propertiesFile);
-        Thread.sleep(70);
-        FileUtils.deleteDirectory(testDir.toFile());
-        Thread.sleep(70);
-
-        Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(propertiesFile.toFile());
-        Mockito.verifyNoMoreInteractions(mockUpdater);
-        assumeNotYetFixed("The monitor should pick up the deletion of the root folder, it might imply deletion of many bags");
-        monitor.stop();
-    }*/
-
     @Test
     public void should_throw_when_stopping_a_stopped_monitor() throws Exception {
         var mockUpdater = Mockito.mock(DepositStatusUpdater.class);
