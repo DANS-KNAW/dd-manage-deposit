@@ -131,9 +131,9 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         var propertiesFile = testDir.resolve("bag/deposit.properties");
         createDirectories(propertiesFile.getParent());
         Files.createFile(propertiesFile);
-        Thread.sleep(30);
+        Thread.sleep(70);
         Files.writeString(propertiesFile, "just some garbage");
-        Thread.sleep(30);
+        Thread.sleep(70);
 
         Mockito.verify(mockUpdater, Mockito.times(1)).onDepositChange(propertiesFile.toFile());
 
@@ -148,13 +148,12 @@ public class IngestPathMonitorTest extends AbstractTestWithTestDir {
         var propertiesFile = testDir.resolve("bag/deposit.properties");
         createDirectories(propertiesFile.getParent());
         Files.createFile(propertiesFile);
-        Thread.sleep(30);
+        Thread.sleep(70);
         FileUtils.deleteDirectory(testDir.toFile());
-        Thread.sleep(30);
+        Thread.sleep(70);
 
         Mockito.verify(mockUpdater, Mockito.times(1)).onDepositCreate(propertiesFile.toFile());
         Mockito.verifyNoMoreInteractions(mockUpdater);
-        assumeNotYetFixed("The monitor should pick up the deletion of the root folder, it might imply deletion of many bags");
         monitor.stop();
     }
 
