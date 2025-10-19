@@ -35,6 +35,7 @@
 
     <properties>
         <main-class>nl.knaw.dans.managedeposit.DdManageDepositApplication</main-class>
+        <dans-build-resources-maven-plugin.version>0.8.0</dans-build-resources-maven-plugin.version>
     </properties>
 
     <scm>
