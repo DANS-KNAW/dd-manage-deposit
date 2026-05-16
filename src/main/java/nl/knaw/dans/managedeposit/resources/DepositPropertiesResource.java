@@ -16,10 +16,14 @@
 package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.managedeposit.Conversions;
+import nl.knaw.dans.managedeposit.api.DepositPropertiesDto;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
+import org.mapstruct.factory.Mappers;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,7 +33,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/")
-public class DepositPropertiesResource {
+public class DepositPropertiesResource implements DefaultApi {
+    private static final Conversions mapper = Mappers.getMapper(Conversions.class);
     private final DepositPropertiesDao depositPropertiesDAO;
     private final String helpInfo;
 
@@ -57,7 +62,7 @@ public class DepositPropertiesResource {
 
     @GET
     @UnitOfWork
-    public Response getApiInformation() {
+    public Response rootGet() {
 
         return Response
             .status(Response.Status.OK)
@@ -70,7 +75,9 @@ public class DepositPropertiesResource {
     @UnitOfWork
     @Consumes("application/json")
     @Produces("application/json")
-    public DepositProperties createDepositPropertiesRecord(@Valid DepositProperties depositProperties) {
-        return depositPropertiesDAO.create(depositProperties);
+    public Response rootPost(@Valid @NotNull DepositPropertiesDto depositPropertiesDto) {
+        DepositProperties depositProperties = mapper.toEntity(depositPropertiesDto);
+        DepositProperties created = depositPropertiesDAO.create(depositProperties);
+        return Response.ok(mapper.toDto(created)).build();
     }
 }

@@ -20,6 +20,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import nl.knaw.dans.managedeposit.api.DepositPropertiesDto;
+import nl.knaw.dans.managedeposit.core.DepositProperties;
+
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -35,7 +38,7 @@ import java.util.List;
 // Copied from http://www.javaprocess.com/2015/08/a-simple-csv-messagebodywriter-for-jax.html
 @Provider
 @Produces("text/csv")
-public class CsvMessageBodyWriter implements MessageBodyWriter<List<DepositProperties>> {
+public class CsvMessageBodyWriter implements MessageBodyWriter<List<?>> {
 
     @Override
     public boolean isWriteable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
