@@ -17,7 +17,7 @@ package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -30,10 +30,10 @@ import javax.ws.rs.core.Response;
 
 @Path("/")
 public class DepositPropertiesResource {
-    private final DepositPropertiesDAO depositPropertiesDAO;
+    private final DepositPropertiesDao depositPropertiesDAO;
     private final String helpInfo;
 
-    public DepositPropertiesResource(DepositPropertiesDAO depositPropertiesDAO) {
+    public DepositPropertiesResource(DepositPropertiesDao depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
         this.helpInfo = writeHelpInfoText();
     }
@@ -44,7 +44,6 @@ public class DepositPropertiesResource {
                 DD Manage Deposit is running.\s
                 Usage:\s
                   - Create reports: GET  basePath/report\s
-                  - Clean database: POST basePath/delete-deposit\s
                   - Query string parameters: user, state, startdate, enddate, deleted\s
                     - 'startdate'/'enddate' format: yyyy-MM-dd\s
                     - 'deleted' is a boolean with values: 'true' or 'false'\s
@@ -53,9 +52,7 @@ public class DepositPropertiesResource {
                   Examples:\s
                     curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
                     curl -i -X GET  basePath/report?user=XXX&state=REJECTED\s
-                    curl -i -X GET  basePath/report/{depositId}\s
-                    curl -i -X POST basePath/delete-deposit?user=XXX\s
-                    curl -i -X POST basePath/delete-deposit?user=XXX&state=REJECTED""";
+                    curl -i -X GET  basePath/report/{depositId}""";
     }
 
     @GET

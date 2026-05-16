@@ -17,7 +17,7 @@ package nl.knaw.dans.managedeposit.core.service;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +29,10 @@ import java.util.Optional;
 
 public class DepositStatusUpdater {
     private static final Logger log = LoggerFactory.getLogger(DepositStatusUpdater.class);
-    private final DepositPropertiesDAO depositPropertiesDAO;
+    private final DepositPropertiesDao depositPropertiesDAO;
     private final DepositPropertiesAssembler depositPropertiesAssembler;
 
-    public DepositStatusUpdater(DepositPropertiesDAO depositPropertiesDAO) {
+    public DepositStatusUpdater(DepositPropertiesDao depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
         this.depositPropertiesAssembler = new DepositPropertiesAssembler();
     }

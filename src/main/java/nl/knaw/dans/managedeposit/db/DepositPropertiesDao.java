@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
@@ -40,10 +39,10 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("resource")
-public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDAO.class);
+public class DepositPropertiesDao extends AbstractDAO<DepositProperties> {
+    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDao.class);
 
-    public DepositPropertiesDAO(SessionFactory sessionFactory) {
+    public DepositPropertiesDao(SessionFactory sessionFactory) {
         super(sessionFactory);
     }
 
@@ -83,22 +82,6 @@ public class DepositPropertiesDAO extends AbstractDAO<DepositProperties> {
         criteriaQuery.select(root).where(predicate);
         Query<DepositProperties> query = currentSession().createQuery(criteriaQuery);
         return query.getResultList();
-    }
-
-    public Optional<Integer> deleteSelection(Map<String, List<String>> queryParameters) {
-        var criteriaBuilder = currentSession().getCriteriaBuilder();
-        if (queryParameters.isEmpty()) {
-            throw new InvalidRequestParameterException("Delete command without argument would make database empty. It is not accepted.");
-        }
-
-        CriteriaDelete<DepositProperties> deleteQuery = criteriaBuilder.createCriteriaDelete(DepositProperties.class);
-        Root<DepositProperties> root = deleteQuery.from(DepositProperties.class);
-
-        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
-
-        deleteQuery.where(predicate);
-        var query = currentSession().createQuery(deleteQuery);
-        return Optional.of(query.executeUpdate());
     }
 
     private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {

@@ -18,7 +18,7 @@ package nl.knaw.dans.managedeposit.resources;
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.core.service.InvalidRequestParameterException;
-import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ import java.util.Optional;
 @Path("/report")
 public class DepositPropertiesReportResource {
     private static final Logger log = LoggerFactory.getLogger(DepositPropertiesReportResource.class);
-    private final DepositPropertiesDAO depositPropertiesDAO;
+    private final DepositPropertiesDao depositPropertiesDAO;
 
-    public DepositPropertiesReportResource(DepositPropertiesDAO depositPropertiesDAO) {
+    public DepositPropertiesReportResource(DepositPropertiesDao depositPropertiesDAO) {
         this.depositPropertiesDAO = depositPropertiesDAO;
     }
 

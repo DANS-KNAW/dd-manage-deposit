@@ -18,7 +18,7 @@ package nl.knaw.dans.managedeposit;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.db.DepositPropertiesDAO;
+import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -27,11 +27,11 @@ public abstract class AbstractDatabaseTest extends AbstractTestWithTestDir {
     protected final DAOTestExtension daoTestExtension = DAOTestExtension.newBuilder()
         .addEntityClass(DepositProperties.class)
         .build();
-    protected DepositPropertiesDAO dao;
+    protected DepositPropertiesDao dao;
 
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        dao = new DepositPropertiesDAO(daoTestExtension.getSessionFactory());
+        dao = new DepositPropertiesDao(daoTestExtension.getSessionFactory());
     }
 }
