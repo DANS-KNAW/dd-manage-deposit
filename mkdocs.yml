@@ -22,9 +22,13 @@ repo_name: DANS-KNAW/dd-manage-deposit
 repo_url: https://github.com/DANS-KNAW/dd-manage-deposit
 
 nav:
-  - Manual: index.md
-  - API: to-api.md
-  - ⇒ DANS Data Station Architecture: arch.md
+  - Manual:
+      - Description: index.md
+      - Installation: installation.md
+      - API: to-api.md
+      - Context: context.md
+  - Development:
+      - Overview: dev.md
 
 plugins:
   - markdownextradata
