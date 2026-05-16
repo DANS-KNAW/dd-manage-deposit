@@ -16,68 +16,18 @@
 package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import nl.knaw.dans.managedeposit.Conversions;
-import nl.knaw.dans.managedeposit.api.DepositPropertiesDto;
-import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
-import org.mapstruct.factory.Mappers;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/")
 public class DepositPropertiesResource implements DefaultApi {
-    private static final Conversions mapper = Mappers.getMapper(Conversions.class);
-    private final DepositPropertiesDao depositPropertiesDAO;
-    private final String helpInfo;
-
-    public DepositPropertiesResource(DepositPropertiesDao depositPropertiesDAO) {
-        this.depositPropertiesDAO = depositPropertiesDAO;
-        this.helpInfo = writeHelpInfoText();
-    }
-
-    private String writeHelpInfoText() {
-        return
-            """
-                DD Manage Deposit is running.\s
-                Usage:\s
-                  - Create reports: GET  basePath/report\s
-                  - Query string parameters: user, state, startdate, enddate, deleted\s
-                    - 'startdate'/'enddate' format: yyyy-MM-dd\s
-                    - 'deleted' is a boolean with values: 'true' or 'false'\s
-                    - Possible 'state' values: ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED\s
-                    - To give an undefined parameter (when column's value is empty or null): 'parameterName=' (ex. 'user=')\s
-                  Examples:\s
-                    curl -i -X GET  basePath/report?startdate=yyyy-MM-dd\s
-                    curl -i -X GET  basePath/report?user=XXX&state=REJECTED\s
-                    curl -i -X GET  basePath/report/{depositId}""";
-    }
 
     @GET
     @UnitOfWork
     public Response rootGet() {
-
-        return Response
-            .status(Response.Status.OK)
-            .entity(this.helpInfo)
-            .type(MediaType.TEXT_PLAIN)
-            .build();
+        return Response.ok().entity(
+            "DD Manage Deposit Properties v%s".formatted(
+                this.getClass().getPackage().getImplementationVersion())).build();
     }
 
-    @POST
-    @UnitOfWork
-    @Consumes("application/json")
-    @Produces("application/json")
-    public Response rootPost(@Valid @NotNull DepositPropertiesDto depositPropertiesDto) {
-        DepositProperties depositProperties = mapper.toEntity(depositPropertiesDto);
-        DepositProperties created = depositPropertiesDAO.create(depositProperties);
-        return Response.ok(mapper.toDto(created)).build();
-    }
 }

@@ -17,12 +17,15 @@ package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import nl.knaw.dans.managedeposit.Conversions;
+import nl.knaw.dans.managedeposit.api.DepositPropertiesDto;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -53,6 +56,14 @@ public class DepositPropertiesReportResource implements ReportApi {
             throw new WebApplicationException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @UnitOfWork
+    @Override
+    public Response reportPost(@Valid @NotNull DepositPropertiesDto depositPropertiesDto) {
+        DepositProperties depositProperties = mapper.toEntity(depositPropertiesDto);
+        DepositProperties created = depositPropertiesDAO.create(depositProperties);
+        return Response.ok(mapper.toDto(created)).build();
     }
 
     @UnitOfWork

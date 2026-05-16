@@ -58,9 +58,9 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
     @Override
     public void run(final DdManageDepositConfiguration configuration, final Environment environment) {
-        DepositPropertiesDao depositPropertiesDAO = new DepositPropertiesDao(depositPropertiesHibernate.getSessionFactory());
-        environment.jersey().register(new DepositPropertiesResource(depositPropertiesDAO));
-        environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDAO));
+        DepositPropertiesDao depositPropertiesDao = new DepositPropertiesDao(depositPropertiesHibernate.getSessionFactory());
+        environment.jersey().register(new DepositPropertiesResource());
+        environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDao));
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
 
@@ -68,7 +68,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
         final UnitOfWorkAwareProxyFactory proxyFactory = new UnitOfWorkAwareProxyFactory(depositPropertiesHibernate);
         DepositStatusUpdater depositStatusUpdater = proxyFactory.create(
-            DepositStatusUpdater.class, DepositPropertiesDao.class, depositPropertiesDAO);
+            DepositStatusUpdater.class, DepositPropertiesDao.class, depositPropertiesDao);
 
         final IngestPathMonitor ingestPathMonitor = new IngestPathMonitor(configuration.getDepositBoxes(), depositStatusUpdater, configuration.getPollingInterval());
         environment.lifecycle().manage(ingestPathMonitor);
