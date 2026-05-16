@@ -17,30 +17,22 @@ package nl.knaw.dans.managedeposit.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
-import nl.knaw.dans.managedeposit.core.service.InvalidRequestParameterException;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("resource")
 public class DepositPropertiesDao extends AbstractDAO<DepositProperties> {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesDao.class);
 
     public DepositPropertiesDao(SessionFactory sessionFactory) {
         super(sessionFactory);
@@ -70,100 +62,39 @@ public class DepositPropertiesDao extends AbstractDAO<DepositProperties> {
         return currentSession().createQuery("from DepositProperties", DepositProperties.class).list();
     }
 
-    public List<DepositProperties> findSelection(Map<String, List<String>> queryParameters) {
-        CriteriaBuilder criteriaBuilder = currentSession().getCriteriaBuilder();
-
-        if (queryParameters.isEmpty())
-            return findAll();
-
-        CriteriaQuery<DepositProperties> criteriaQuery = criteriaBuilder.createQuery(DepositProperties.class);
-        Root<DepositProperties> root = criteriaQuery.from(DepositProperties.class);
-        Predicate predicate = buildQueryCriteria(queryParameters, criteriaBuilder, root);
-        criteriaQuery.select(root).where(predicate);
-        Query<DepositProperties> query = currentSession().createQuery(criteriaQuery);
-        return query.getResultList();
-    }
-
-    private Predicate buildQueryCriteria(Map<String, List<String>> queryParameters, CriteriaBuilder criteriaBuilder, Root<DepositProperties> root) {
+    public List<DepositProperties> findSelection(String user, String state, LocalDate startdate, LocalDate enddate, Boolean deleted, String depositid) {
+        CriteriaBuilder cb = currentSession().getCriteriaBuilder();
+        CriteriaQuery<DepositProperties> cq = cb.createQuery(DepositProperties.class);
+        Root<DepositProperties> root = cq.from(DepositProperties.class);
         List<Predicate> predicates = new ArrayList<>();
-        boolean startDateSpecifiedAlready = false, endDateSpecifiedAlready = false;
-        Predicate predicate;
 
-        for (String key : queryParameters.keySet()) {
-            List<String> values = queryParameters.get(key);
-            String parameter = key.toLowerCase();
-            if (values.isEmpty()) {
-                throw new InvalidRequestParameterException(String.format("Empty value of parameter %s", parameter));
-            }
-            //javax.persistence.criteria
-            Predicate orPredicateItem;
-            List<Predicate> orPredicatesList = new ArrayList<>();
-            for (String value : values) {
-                switch (parameter) {
-                    case "depositid":
-                        orPredicateItem = criteriaBuilder.equal(root.get("depositId"), value);
-                        break;
-
-                    case "user":
-                        orPredicateItem = criteriaBuilder.equal(root.get("depositor"), value);
-                        break;
-
-                    case "deleted":
-                        if (Boolean.parseBoolean(value))
-                            orPredicateItem = criteriaBuilder.isTrue(root.get("deleted"));
-                        else
-                            orPredicateItem = criteriaBuilder.isFalse(root.get("deleted"));
-                        break;
-
-                    case "state":
-                        orPredicateItem = criteriaBuilder.equal(root.get("depositState"), value);
-                        break;
-
-                    case "startdate":
-                    case "enddate":
-                        if (value.isEmpty()) {
-                            orPredicateItem = criteriaBuilder.isNull(root.get("depositCreationTimestamp"));
-                        }
-                        else {
-                            try {
-                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                                LocalDate date = LocalDate.parse(value, formatter);
-                                var asked_date = OffsetDateTime.of(date.atStartOfDay(), ZoneOffset.UTC);
-
-                                if (parameter.equals("startdate")) {
-                                    if (startDateSpecifiedAlready)
-                                        throw new InvalidRequestParameterException(String.format("Duplicated startdate parameter %s = %s ", parameter, value));
-                                    orPredicateItem = criteriaBuilder.greaterThan(root.get("depositCreationTimestamp"), asked_date);
-                                    startDateSpecifiedAlready = true;
-                                }
-                                else {
-                                    if (endDateSpecifiedAlready)
-                                        throw new InvalidRequestParameterException(String.format("Duplicated enddate parameter %s = %s ", parameter, value));
-                                    orPredicateItem = criteriaBuilder.lessThan(root.get("depositCreationTimestamp"), asked_date);
-                                    endDateSpecifiedAlready = true;
-                                }
-                            }
-                            catch (DateTimeException e) {
-                                log.error("Invalid or incorrectly formatted date parameter {}", e.getMessage());
-                                String error = String.format("Invalid or incorrectly formatted parameter %s = %s ", parameter, value);
-                                throw new InvalidRequestParameterException(String.format("Invalid or incorrectly formatted parameter %s = %s ", parameter, value));
-                            }
-                        }
-                        break;
-
-                    default:
-                        throw new InvalidRequestParameterException(String.format("Unknown parameter %s = %s ", parameter, value));
-                }
-                orPredicatesList.add(orPredicateItem);
-            }
-
-            orPredicateItem = criteriaBuilder.or(orPredicatesList.toArray(new Predicate[0]));
-            predicates.add(orPredicateItem);
+        if (user != null) {
+            predicates.add(cb.equal(root.get("depositor"), user));
+        }
+        if (state != null) {
+            predicates.add(cb.equal(root.get("depositState"), state));
+        }
+        if (deleted != null) {
+            predicates.add(cb.equal(root.get("deleted"), deleted));
+        }
+        if (depositid != null) {
+            predicates.add(cb.equal(root.get("depositId"), depositid));
+        }
+        if (startdate != null) {
+            var start = OffsetDateTime.of(startdate.atStartOfDay(), ZoneOffset.UTC);
+            predicates.add(cb.greaterThan(root.get("depositCreationTimestamp"), start));
+        }
+        if (enddate != null) {
+            var end = OffsetDateTime.of(enddate.atStartOfDay(), ZoneOffset.UTC);
+            predicates.add(cb.lessThan(root.get("depositCreationTimestamp"), end));
         }
 
-        predicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        if (predicates.isEmpty()) {
+            return findAll();
+        }
 
-        return predicate;
+        cq.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
+        return currentSession().createQuery(cq).getResultList();
     }
 
     public Optional<Integer> updateDeleteFlag(String depositId, boolean deleted) {
@@ -171,8 +102,7 @@ public class DepositPropertiesDao extends AbstractDAO<DepositProperties> {
         CriteriaUpdate<DepositProperties> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(DepositProperties.class);
         Root<DepositProperties> root = criteriaUpdate.from(DepositProperties.class);
 
-        Predicate predicate = buildQueryCriteria(Map.of("depositId", List.of(depositId)), criteriaBuilder, root);
-        criteriaUpdate.where(predicate);
+        criteriaUpdate.where(criteriaBuilder.equal(root.get("depositId"), depositId));
 
         criteriaUpdate.set("deleted", deleted);
 
