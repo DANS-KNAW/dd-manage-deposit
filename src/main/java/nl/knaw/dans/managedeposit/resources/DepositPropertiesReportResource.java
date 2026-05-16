@@ -16,13 +16,12 @@
 package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import lombok.extern.slf4j.Slf4j;
 import nl.knaw.dans.managedeposit.Conversions;
 import nl.knaw.dans.managedeposit.api.DepositPropertiesDto;
 import nl.knaw.dans.managedeposit.core.DepositProperties;
 import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 import org.mapstruct.factory.Mappers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -33,20 +32,20 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class DepositPropertiesReportResource implements ReportApi {
-    private static final Logger log = LoggerFactory.getLogger(DepositPropertiesReportResource.class);
     private static final Conversions mapper = Mappers.getMapper(Conversions.class);
-    private final DepositPropertiesDao depositPropertiesDAO;
+    private final DepositPropertiesDao depositPropertiesDao;
 
-    public DepositPropertiesReportResource(DepositPropertiesDao depositPropertiesDAO) {
-        this.depositPropertiesDAO = depositPropertiesDAO;
+    public DepositPropertiesReportResource(DepositPropertiesDao depositPropertiesDao) {
+        this.depositPropertiesDao = depositPropertiesDao;
     }
 
     @UnitOfWork
     @Override
     public Response reportGet(String user, String state, LocalDate startdate, LocalDate enddate, Boolean deleted, String depositid) {
         try {
-            List<DepositProperties> result = depositPropertiesDAO.findSelection(user, state, startdate, enddate, deleted, depositid);
+            List<DepositProperties> result = depositPropertiesDao.findSelection(user, state, startdate, enddate, deleted, depositid);
             return Response.status(Response.Status.OK)
                 .entity(result.stream().map(mapper::toDto).collect(Collectors.toList()))
                 .build();
@@ -62,14 +61,14 @@ public class DepositPropertiesReportResource implements ReportApi {
     @Override
     public Response reportPost(@Valid @NotNull DepositPropertiesDto depositPropertiesDto) {
         DepositProperties depositProperties = mapper.toEntity(depositPropertiesDto);
-        DepositProperties created = depositPropertiesDAO.create(depositProperties);
+        DepositProperties created = depositPropertiesDao.create(depositProperties);
         return Response.ok(mapper.toDto(created)).build();
     }
 
     @UnitOfWork
     @Override
     public Response reportDepositIdGet(String depositId) {
-        DepositProperties dp = depositPropertiesDAO.findById(depositId)
+        DepositProperties dp = depositPropertiesDao.findById(depositId)
             .orElseThrow(() -> new NotFoundException(String.format("No such deposit: %s", depositId)));
         return Response.ok(mapper.toDto(dp)).build();
     }

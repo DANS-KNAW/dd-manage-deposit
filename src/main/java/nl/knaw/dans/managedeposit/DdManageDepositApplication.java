@@ -30,6 +30,7 @@ import nl.knaw.dans.managedeposit.db.DepositPropertiesDao;
 import nl.knaw.dans.managedeposit.health.InboxHealthCheck;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesReportResource;
 import nl.knaw.dans.managedeposit.resources.DepositPropertiesResource;
+import nl.knaw.dans.managedeposit.resources.LocalDateParamConverterProvider;
 
 public class DdManageDepositApplication extends Application<DdManageDepositConfiguration> {
 
@@ -48,7 +49,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
 
     @Override
     public String getName() {
-        return "Dd Manage Deposit";
+        return "DD Manage Deposit";
     }
 
     @Override
@@ -61,6 +62,7 @@ public class DdManageDepositApplication extends Application<DdManageDepositConfi
         DepositPropertiesDao depositPropertiesDao = new DepositPropertiesDao(depositPropertiesHibernate.getSessionFactory());
         environment.jersey().register(new DepositPropertiesResource());
         environment.jersey().register(new DepositPropertiesReportResource(depositPropertiesDao));
+        environment.jersey().register(new LocalDateParamConverterProvider());
 
         environment.healthChecks().register("Inbox", new InboxHealthCheck(configuration));
 
