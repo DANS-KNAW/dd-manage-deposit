@@ -35,7 +35,7 @@
 
     <properties>
         <main-class>nl.knaw.dans.managedeposit.DdManageDepositApplication</main-class>
-        <dd-manage-deposit-api.version>1.0.0</dd-manage-deposit-api.version>
+        <dd-manage-deposit-api.version>1.0.1</dd-manage-deposit-api.version>
     </properties>
 
     <scm>
