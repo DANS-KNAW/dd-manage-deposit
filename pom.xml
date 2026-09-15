@@ -30,7 +30,7 @@
 
     <name>DD Manage Deposit</name>
     <description>Service that manages and maintains information about deposits in a deposit area</description>
-    <url>https://github.com/DANS-KNAW/dd-manage-deposit</url>
+    <url>https://dans-knaw.github.io/dd-manage-deposit</url>
     <inceptionYear>2023</inceptionYear>
 
     <scm>
