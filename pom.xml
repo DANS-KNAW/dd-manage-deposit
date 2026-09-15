@@ -22,7 +22,7 @@
     <parent>
         <groupId>nl.knaw.dans</groupId>
         <artifactId>dd-parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>dd-manage-deposit</artifactId>
@@ -92,13 +92,12 @@
             <artifactId>mapstruct</artifactId>
         </dependency>
         <dependency>
-            <groupId>nl.knaw.dans</groupId>
+            <groupId>nl.datastations</groupId>
             <artifactId>dans-java-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>nl.knaw.dans</groupId>
             <artifactId>dd-manage-deposit-api</artifactId>
-            <version>${dd-manage-deposit-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
