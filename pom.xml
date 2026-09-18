@@ -34,6 +34,7 @@
     <inceptionYear>2023</inceptionYear>
 
     <scm>
+        <connection>scm:git:https://github.com/DANS-KNAW/dd-manage-deposit</connection>
         <developerConnection>scm:git:ssh://github.com/DANS-KNAW/dd-manage-deposit</developerConnection>
         <tag>HEAD</tag>
         <url>https://github.com/DANS-KNAW/${project.artifactId}</url>
