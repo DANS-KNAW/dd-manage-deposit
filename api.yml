@@ -1,0 +1,175 @@
+#
+# Copyright (C) 2024 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+openapi: 3.0.1
+
+servers:
+  - url: http://localhost:20355/
+
+info:
+  description: Service for managing deposits
+  version: 1.0.1
+  title: dd-manage-deposit-api
+  contact:
+    email: info@dans.knaw.nl
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+paths:
+  /:
+    get:
+      operationId: rootGet
+      summary: Returns a description of the service.
+      responses:
+        200:
+          description: description of the service
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: a plain text, human readable description of the service
+                example: |
+                  Manage Deposit API Running (v1.0.1)
+  /report:
+    post:
+      operationId: reportPost
+      summary: Create a new deposit properties record.
+      requestBody:
+        description: Deposit properties to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositProperties'
+      responses:
+        200:
+          description: The created deposit properties.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositProperties'
+        400:
+          description: Invalid deposit properties.
+    get:
+      operationId: reportGet
+      summary: List deposit properties based on selection criteria.
+      parameters:
+        - name: user
+          in: query
+          schema:
+            type: string
+          description: Filter by depositor user ID.
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [ ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED ]
+          description: Filter by deposit state.
+        - name: startdate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter by creation timestamp (after this date).
+        - name: enddate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter by creation timestamp (before this date).
+        - name: deleted
+          in: query
+          schema:
+            type: boolean
+          description: Filter by deleted flag.
+        - name: depositid
+          in: query
+          schema:
+            type: string
+          description: Filter by deposit ID.
+      responses:
+        200:
+          description: A list of deposit properties.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DepositProperties'
+            text/csv:
+              schema:
+                type: string
+        400:
+          description: Invalid request parameters.
+
+  /report/{depositId}:
+    get:
+      operationId: reportDepositIdGet
+      summary: Get deposit properties by ID.
+      parameters:
+        - name: depositId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The deposit ID.
+      responses:
+        200:
+          description: The deposit properties.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepositProperties'
+        404:
+          description: Deposit properties not found.
+        400:
+          description: Invalid deposit ID.
+
+components:
+  schemas:
+    DepositProperties:
+      type: object
+      required:
+        - depositor
+        - depositId
+        - bagName
+      properties:
+        depositor:
+          type: string
+        depositId:
+          type: string
+          format: uuid
+        bagName:
+          type: string
+        depositState:
+          type: string
+          enum: [ ARCHIVED, DRAFT, FAILED, FINALIZING, INVALID, REJECTED, SUBMITTED, UPLOADED, PUBLISHED ]
+        depositCreationTimestamp:
+          type: string
+          format: date-time
+        depositUpdateTimestamp:
+          type: string
+          format: date-time
+        description:
+          type: string
+        location:
+          type: string
+        storageInBytes:
+          type: integer
+          format: int64
+        deleted:
+          type: boolean
