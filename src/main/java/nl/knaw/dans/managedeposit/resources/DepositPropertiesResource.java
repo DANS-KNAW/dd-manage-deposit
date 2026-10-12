@@ -16,6 +16,7 @@
 package nl.knaw.dans.managedeposit.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import nl.knaw.dans.managedeposit.api.AppInfoDto;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.core.Response;
@@ -25,9 +26,9 @@ public class DepositPropertiesResource implements DefaultApi {
     @GET
     @UnitOfWork
     public Response rootGet() {
-        return Response.ok().entity(
-            "DD Manage Deposit Properties v%s".formatted(
-                this.getClass().getPackage().getImplementationVersion())).build();
+        return Response.ok(new AppInfoDto()
+            .name("dd-manage-deposit")
+            .version(this.getClass().getPackage().getImplementationVersion())).build();
     }
 
 }
